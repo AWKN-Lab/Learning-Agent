@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import threading
 from pathlib import Path
 from typing import Any, Literal
 from uuid import UUID
@@ -10,15 +9,24 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from .core import GOLD, WORD, LearningController, Store
+from .core import (
+    CommandConflict,
+    InvalidTransition,
+    LearningController,
+    SessionNotFound,
+    StateConflict,
+    Store,
+)
 
-app = FastAPI(title="Learning-Agent Demo", version="0.1.1-demo")
+APP_ENV = os.getenv("APP_ENV", "demo")
+app = FastAPI(
+    title="Learning-Agent Demo",
+    version="0.2.0-demo",
+    docs_url=None if APP_ENV == "production" else "/docs",
+    redoc_url=None if APP_ENV == "production" else "/redoc",
+)
 store = Store()
-controller = LearningController(store)
-
-# P0 deploys one Uvicorn process. Serialize mutations so concurrent requests
-# cannot advance the same SQLite-backed state from the same snapshot.
-_mutation_lock = threading.RLock()
+controller = LearningController()
 
 
 @app.middleware("http")
@@ -27,7 +35,9 @@ async def security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Permissions-Policy"] = (
+        "camera=(), microphone=(), geolocation=()"
+    )
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data:; connect-src 'self'; base-uri 'none'; "
@@ -52,6 +62,7 @@ class StepRequest(BaseModel):
     event: Literal["ANSWER_SUBMITTED", "VERIFY_ANSWER", "WORD_ANSWER"]
     payload: StepPayload
     event_id: str = Field(min_length=16, max_length=128)
+    expected_version: int = Field(ge=0)
 
     @model_validator(mode="after")
     def validate_event_namespace(self):
@@ -61,30 +72,34 @@ class StepRequest(BaseModel):
         return self
 
 
-def current_task(state: dict[str, Any]) -> dict[str, Any] | None:
-    if state["state"] in {"TASK", "RETRY"}:
-        return GOLD["task"]
-    if state["state"] == "VERIFY":
-        index = state["variant_index"]
-        return GOLD["variants"][index] if index < len(GOLD["variants"]) else None
-    if state["state"] == "WORD_TASK":
-        return WORD["task"]
-    return None
+@app.get("/api/v1/live")
+def live() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.get("/api/v1/ready")
+def ready() -> dict[str, Any]:
+    try:
+        checks = store.readiness()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="not_ready") from exc
+    return {"status": "ok", **checks}
 
 
 @app.get("/api/v1/health")
-def health() -> dict[str, str]:
+def health() -> dict[str, Any]:
+    """Compatibility endpoint; /live and /ready are canonical probes."""
     return {
         "status": "ok",
         "mode": os.getenv("LEARNING_MODE", "deterministic"),
-        "mutation_model": "single-process-serialized",
+        "mutation_model": "sqlite-atomic-command",
+        "app_env": APP_ENV,
     }
 
 
 @app.post("/api/v1/session/start")
 def start_session() -> dict[str, Any]:
-    with _mutation_lock:
-        return controller.start().as_dict()
+    return store.create_session(controller).as_dict()
 
 
 @app.get("/api/v1/session/{session_id}")
@@ -93,38 +108,40 @@ def get_session(session_id: UUID) -> dict[str, Any]:
     state = store.get_session(sid)
     if not state:
         raise HTTPException(status_code=404, detail="session_not_found")
-    return {"session": state, "current_task": current_task(state), "events": store.events(sid)}
+    return {
+        "session": state,
+        "current_task": controller.current_task(state),
+        "events": store.events(sid),
+    }
+
+
+@app.get("/api/v1/internal/session/{session_id}/integrity")
+def session_integrity(session_id: UUID) -> dict[str, Any]:
+    if APP_ENV == "production":
+        raise HTTPException(status_code=404, detail="api_route_not_found")
+    try:
+        return store.integrity(controller, str(session_id))
+    except SessionNotFound as exc:
+        raise HTTPException(status_code=404, detail=exc.code) from exc
 
 
 @app.post("/api/v1/learning/step")
 def learning_step(request: StepRequest) -> dict[str, Any]:
     sid = str(request.session_id)
     payload = request.payload.model_dump(exclude_none=True)
-    with _mutation_lock:
-        state = store.get_session(sid)
-        if not state:
-            raise HTTPException(status_code=404, detail="session_not_found")
-
-        # Detect the crash window where the request event was persisted but the
-        # session snapshot did not record it. Fail closed instead of replaying
-        # a mutation against stale state.
-        event_already_logged = any(
-            event["event_id"] == request.event_id for event in store.events(sid)
-        )
-        if event_already_logged and request.event_id not in state.get("processed_event_ids", []):
-            raise HTTPException(status_code=409, detail="incomplete_previous_request")
-
-        try:
-            return controller.step(
-                sid,
-                request.event,
-                payload,
-                request.event_id,
-            ).as_dict()
-        except KeyError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
-            raise HTTPException(status_code=409, detail=str(exc)) from exc
+    try:
+        return store.execute_command(
+            controller=controller,
+            session_id=sid,
+            command_id=request.event_id,
+            event=request.event,
+            payload=payload,
+            expected_version=request.expected_version,
+        ).as_dict()
+    except SessionNotFound as exc:
+        raise HTTPException(status_code=404, detail=exc.code) from exc
+    except (CommandConflict, StateConflict, InvalidTransition) as exc:
+        raise HTTPException(status_code=409, detail=exc.code) from exc
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -133,7 +150,6 @@ if WEB_DIST.exists():
 
     @app.get("/{full_path:path}", include_in_schema=False)
     def spa(full_path: str):
-        # Never let the SPA fallback hide a missing API route.
         if full_path == "api" or full_path.startswith("api/"):
             raise HTTPException(status_code=404, detail="api_route_not_found")
 
