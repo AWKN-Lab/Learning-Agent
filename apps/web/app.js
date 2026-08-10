@@ -89,9 +89,9 @@ async function api(path, options = {}) {
 async function submitCommand(body) {
   const options = {method:'POST', body:JSON.stringify(body)}
   try {
-    return await api('/api/v1/learning/step', options)
+    return await api('api/v1/learning/step', options)
   } catch (error) {
-    if (error.network) return api('/api/v1/learning/step', options)
+    if (error.network) return api('api/v1/learning/step', options)
     throw error
   }
 }
@@ -108,7 +108,7 @@ function applyResult(data) {
 
 async function refreshEventCount() {
   if (!model.session) return
-  const snapshot = await api(`/api/v1/session/${model.session.session_id}`)
+  const snapshot = await api(`api/v1/session/${model.session.session_id}`)
   model.eventsCount = snapshot.events.length
 }
 
@@ -116,7 +116,7 @@ async function start() {
   model.loading = true
   render()
   try {
-    applyResult(await api('/api/v1/session/start', {method:'POST'}))
+    applyResult(await api('api/v1/session/start', {method:'POST'}))
     model.eventsCount = 2
   } catch (error) {
     model.message = `启动失败：${error.message}`
@@ -131,7 +131,7 @@ async function restore() {
   if (!auth) return render()
   model.sessionToken = auth.token
   try {
-    const data = await api(`/api/v1/session/${auth.id}`)
+    const data = await api(`api/v1/session/${auth.id}`)
     model.session = data.session
     model.task = data.current_task
     model.eventsCount = data.events.length
@@ -170,7 +170,7 @@ async function answer(choice) {
   } catch (error) {
     if (error.status === 409) {
       try {
-        const snapshot = await api(`/api/v1/session/${model.session.session_id}`)
+        const snapshot = await api(`api/v1/session/${model.session.session_id}`)
         model.session = snapshot.session
         model.task = snapshot.current_task
         model.eventsCount = snapshot.events.length
