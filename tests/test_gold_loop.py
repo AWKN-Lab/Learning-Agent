@@ -1,17 +1,11 @@
-import os
-import tempfile
 import uuid
-
-_fd, _db = tempfile.mkstemp(prefix="learning-agent-test-", suffix=".db")
-os.close(_fd)
-os.environ["LEARNING_DB_PATH"] = _db
-os.environ["APP_ENV"] = "test"
 
 from fastapi.testclient import TestClient  # noqa: E402
 
 from apps.api.app import app  # noqa: E402
 
 client = TestClient(app)
+TOKENS: dict[str, str] = {}
 
 
 def request_id(session_id: str, suffix: str | None = None) -> str:
@@ -21,7 +15,13 @@ def request_id(session_id: str, suffix: str | None = None) -> str:
 def start() -> dict:
     response = client.post("/api/v1/session/start")
     assert response.status_code == 200
-    return response.json()
+    data = response.json()
+    TOKENS[data["session"]["session_id"]] = data["session_token"]
+    return data
+
+
+def auth_headers(session_id: str) -> dict[str, str]:
+    return {"X-Session-Token": TOKENS[session_id]}
 
 
 def step(
@@ -34,6 +34,7 @@ def step(
 ):
     return client.post(
         "/api/v1/learning/step",
+        headers=auth_headers(session["session_id"]),
         json={
             "session_id": session["session_id"],
             "event": event,
@@ -51,13 +52,21 @@ def step(
 def test_complete_demo_closed_loop_and_replay_integrity():
     session = start()["session"]
 
-    wrong = step(session, "ANSWER_SUBMITTED", {"answer": "trapped"})
+    wrong = step(
+        session,
+        "ANSWER_SUBMITTED",
+        {"answer": "trapped"},
+    )
     assert wrong.status_code == 200
     session = wrong.json()["session"]
     assert session["version"] == 1
     assert wrong.json()["error_type"] == "POINTER_ERROR"
 
-    fixed = step(session, "ANSWER_SUBMITTED", {"answer": "ruins"})
+    fixed = step(
+        session,
+        "ANSWER_SUBMITTED",
+        {"answer": "ruins"},
+    )
     assert fixed.status_code == 200
     session = fixed.json()["session"]
     assert session["state"] == "VERIFY"
@@ -85,7 +94,8 @@ def test_complete_demo_closed_loop_and_replay_integrity():
     assert session["word_status"] == "VERIFIED"
 
     snapshot = client.get(
-        f"/api/v1/session/{session['session_id']}"
+        f"/api/v1/session/{session['session_id']}",
+        headers=auth_headers(session["session_id"]),
     ).json()
     event_types = [event["event_type"] for event in snapshot["events"]]
     assert "error_diagnosed" in event_types
@@ -93,7 +103,8 @@ def test_complete_demo_closed_loop_and_replay_integrity():
     assert "demo_completed" in event_types
 
     integrity = client.get(
-        f"/api/v1/internal/session/{session['session_id']}/integrity"
+        f"/api/v1/internal/session/{session['session_id']}/integrity",
+        headers=auth_headers(session["session_id"]),
     )
     assert integrity.status_code == 200
     assert integrity.json()["consistent"] is True
@@ -134,11 +145,18 @@ def test_receipt_replays_exact_response_and_rejects_command_reuse():
 
 def test_stale_version_rejected_without_event_or_state_change():
     session = start()["session"]
-    first = step(session, "ANSWER_SUBMITTED", {"answer": "trapped"})
+    first = step(
+        session,
+        "ANSWER_SUBMITTED",
+        {"answer": "trapped"},
+    )
     assert first.status_code == 200
 
     sid = session["session_id"]
-    before = client.get(f"/api/v1/session/{sid}").json()
+    before = client.get(
+        f"/api/v1/session/{sid}",
+        headers=auth_headers(sid),
+    ).json()
     stale = step(
         session,
         "ANSWER_SUBMITTED",
@@ -148,14 +166,20 @@ def test_stale_version_rejected_without_event_or_state_change():
     )
     assert stale.status_code == 409
     assert stale.json()["detail"] == "state_conflict"
-    after = client.get(f"/api/v1/session/{sid}").json()
+    after = client.get(
+        f"/api/v1/session/{sid}",
+        headers=auth_headers(sid),
+    ).json()
     assert after == before
 
 
 def test_invalid_transition_and_input_contracts():
     session = start()["session"]
     sid = session["session_id"]
-    before = client.get(f"/api/v1/session/{sid}").json()
+    before = client.get(
+        f"/api/v1/session/{sid}",
+        headers=auth_headers(sid),
+    ).json()
 
     invalid = step(
         session,
@@ -164,10 +188,14 @@ def test_invalid_transition_and_input_contracts():
     )
     assert invalid.status_code == 409
     assert invalid.json()["detail"] == "invalid_transition"
-    assert client.get(f"/api/v1/session/{sid}").json() == before
+    assert client.get(
+        f"/api/v1/session/{sid}",
+        headers=auth_headers(sid),
+    ).json() == before
 
     missing_version = client.post(
         "/api/v1/learning/step",
+        headers=auth_headers(sid),
         json={
             "session_id": sid,
             "event": "ANSWER_SUBMITTED",
@@ -179,6 +207,7 @@ def test_invalid_transition_and_input_contracts():
 
     wrong_namespace = client.post(
         "/api/v1/learning/step",
+        headers=auth_headers(sid),
         json={
             "session_id": sid,
             "event": "ANSWER_SUBMITTED",
@@ -191,6 +220,7 @@ def test_invalid_transition_and_input_contracts():
 
     oversized = client.post(
         "/api/v1/learning/step",
+        headers=auth_headers(sid),
         json={
             "session_id": sid,
             "event": "ANSWER_SUBMITTED",
@@ -205,7 +235,10 @@ def test_invalid_transition_and_input_contracts():
 def test_spa_security_and_health_contracts():
     missing_api = client.get("/api/v1/does-not-exist")
     assert missing_api.status_code == 404
-    assert "application/json" in missing_api.headers.get("content-type", "")
+    assert "application/json" in missing_api.headers.get(
+        "content-type",
+        "",
+    )
 
     traversal = client.get("/%2e%2e/README.md")
     assert traversal.status_code == 404
