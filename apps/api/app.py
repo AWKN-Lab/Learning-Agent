@@ -6,7 +6,6 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -71,15 +70,6 @@ def learning_step(request: StepRequest) -> dict[str, Any]:
 
 
 ROOT = Path(__file__).resolve().parents[2]
-WEB_DIST = ROOT / "apps" / "web" / "dist"
-if WEB_DIST.exists():
-    assets = WEB_DIST / "assets"
-    if assets.exists():
-        app.mount("/assets", StaticFiles(directory=assets), name="assets")
-
-    @app.get("/{full_path:path}", include_in_schema=False)
-    def spa(full_path: str):
-        candidate = WEB_DIST / full_path
-        if full_path and candidate.is_file():
-            return FileResponse(candidate)
-        return FileResponse(WEB_DIST / "index.html")
+WEB_ROOT = ROOT / "apps" / "web"
+if WEB_ROOT.exists():
+    app.mount("/", StaticFiles(directory=WEB_ROOT, html=True), name="web")
