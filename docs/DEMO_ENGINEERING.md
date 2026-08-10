@@ -1,10 +1,9 @@
-# 文科实验室 H5 DEMO 工程母文档｜V2.5 闭环基线
+# 文科实验室 H5 DEMO 工程母文档｜V2.6 Hardened Baseline
 
-> 目标版本：`v0.1.0-demo`  
-> 状态：**P0 DEMO CODE CLOSED / CI GREEN / DOCKER GREEN**  
+> 目标版本：`v0.2.0-hardening`  
 > 更新：2026-08-11  
-> 主分支验证 Commit：`5bd2a49d8b481377c5e048c3b024b078bb6da727`  
-> GitHub Actions Run：`31412516711`
+> 代码基线：`15edeab92a495300a31d6475f865ed9ea5c0f5e0`  
+> 主分支 CI：`31429090745`，Test / Docker 双绿
 
 ---
 
@@ -12,23 +11,7 @@
 
 ## 1.1 系统目标
 
-当前版本验证一个明确学习结果：
-
-> 系统观察学生的真实操作，定位一个明确逻辑错误，用最小提示帮助学生自己修正，再通过表层不同的新题证明修复成立，并把全过程沉淀为可追踪学习证据。
-
-P0 Gold Node：
-
-```text
-relative_clause.pointer
-```
-
-第二能力：
-
-```text
-eruption → e + rupt + ion
-```
-
-## 1.2 学习闭环
+当前版本证明并保护一条真实学习修复闭环：
 
 ```text
 Observe
@@ -40,130 +23,99 @@ Intervene
 Verify
 ↓
 Update
-↓
-Next Capability
 ```
 
-固定演示路径：
+Gold Node：`relative_clause.pointer`。
 
-```text
-TASK
-↓
-wrong: trapped
-↓
-POINTER_ERROR
-↓
-minimum hint
-↓
-correct: ruins
-↓
-pointer-v1: house PASS
-↓
-pointer-v2: city PASS
-↓
-pointer-v3: room PASS
-↓
-relative_clause.pointer VERIFIED
-↓
-WORD_TASK eruption
-↓
-rupt PASS
-↓
-word.root.rupt VERIFIED
-↓
-DONE / CLOSED_LOOP
-```
+第二能力：`eruption → e + rupt + ion`。
 
 完成条件：
 
-- Controller 状态到 `DONE`；
-- pointer 迁移验证 `3/3`；
-- word root 任务通过；
-- Learning Events 至少包含 `error_diagnosed`、`patch_completed`、`word_verified`、`demo_completed`。
+- 主任务真实发生 `POINTER_ERROR`；
+- 最小提示后学生修正；
+- 3 道迁移题全部通过；
+- `relative_clause.pointer = VERIFIED`；
+- `word.root.rupt = VERIFIED`；
+- Controller 到 `DONE`；
+- Learning Events 包含 diagnosis / patch / state update / completion 证据。
 
-## 1.3 系统架构
+## 1.2 第一性原理工程主干
+
+```text
+Task Model
+↓
+Student Action
+↓
+Pure Learning Reducer
+↓
+Atomic Persistence
+↓
+Evidence / Receipt
+↓
+Learning State
+```
+
+LLM 不负责标准答案、错误类型和长期状态正确性。AI OFF 时主链完整成立。
+
+## 1.3 当前系统架构
 
 ```text
 Browser H5
     │
     ▼
-FastAPI
+FastAPI HTTP Boundary
     │
     ▼
 LearningController
-    │
-    ├─ Task Model
-    ├─ Evaluator
-    ├─ Intervention Policy
-    └─ Transfer Verification
+pure deterministic reducer
     │
     ▼
-SQLite Store
-    ├─ sessions
-    └─ learning_events
-          │
-          ▼
-     Learning State
+Transactional Store
+SQLite
+ ├─ sessions
+ ├─ learning_events
+ ├─ command_receipts
+ └─ rate_limits
+    │
+    ├─ Event Replay / Integrity
+    ├─ Session Token / TTL
+    ├─ Optimistic Version
+    └─ Cleanup / Capacity
 ```
-
-LLM 当前不参与标准答案、错误类型和学习状态判定。
 
 ---
 
 # 2. 组件层
 
-## 2.1 Content / Task Model
+## 2.1 Domain｜LearningController
+
+文件：`apps/api/domain.py`
+
+职责：
+
+- 读取旧状态；
+- 验证合法事件；
+- 计算新状态；
+- 产生 Domain Events；
+- 返回 StepResult。
+
+禁止：
+
+- SQL；
+- HTTP；
+- Token；
+- Rate Limit；
+- 文件系统写入。
+
+核心接口：
 
 ```text
-content/
-├─ gold_relative_clause_pointer.json
-└─ word_eruption.json
+initial_state()
+initial_result()
+initial_events()
+current_task()
+reduce(state, event, payload)
 ```
-
-Gold Content：
-
-- 主任务 1 道；
-- 目标错误 `POINTER_ERROR`；
-- 5 级渐进提示；
-- 3 道 Transfer Variants；
-- 修复成功标准 `3/3`；
-- 第二能力 `word.root.rupt`。
-
-## 2.2 Evaluator
-
-主任务：
-
-```text
-expected = ruins
-actual != ruins
-→ POINTER_ERROR
-```
-
-迁移题标准答案：
-
-```text
-pointer-v1 → house
-pointer-v2 → city
-pointer-v3 → room
-```
-
-迁移题失败时停留在当前 Variant，禁止跳过。
-
-## 2.3 Intervention Policy
-
-连续失败时提示逐级增加：
-
-```text
-P1 错误位置
-P2 结构线索
-P3 回指关系
-P4 先行词定义
-P5 完整结构
-```
-
-首次错误不会直接展示完整答案。
-
-## 2.4 LearningController
 
 状态：
 
@@ -175,309 +127,380 @@ WORD_TASK
 DONE
 ```
 
-合法事件：
+## 2.2 Persistence｜Store
+
+文件：`apps/api/store.py`
+
+职责：
+
+- SQLite Schema / migration；
+- Atomic Command；
+- Learning Events；
+- Session Snapshot；
+- Response Receipt；
+- Session Version；
+- Event Replay；
+- Session Token Hash；
+- TTL / last_accessed；
+- SQLite Rate Limit；
+- Session Cleanup；
+- Readiness。
+
+### Atomic Command
+
+Mutation 固定执行：
 
 ```text
-TASK / RETRY + ANSWER_SUBMITTED
-VERIFY       + VERIFY_ANSWER
-WORD_TASK    + WORD_ANSWER
+BEGIN IMMEDIATE
+↓
+Authorize Session
+↓
+Check existing Receipt
+↓
+Check expected_version
+↓
+LearningController.reduce()
+↓
+Write Command Event
+↓
+Write Derived Events
+↓
+Update Session WHERE version = expected_version
+↓
+Write Response Receipt
+↓
+COMMIT
 ```
 
-非法状态跳转：HTTP `409`，且不写入 Learning Events。
+任何异常：`ROLLBACK`。
 
-## 2.5 Request Idempotency
+### Idempotent Receipt
 
-客户端请求携带 `event_id`。
-
-相同 `event_id` 重复请求：
+同一 `command_id` + 完全相同请求：
 
 ```text
-ui_action = NOOP
-attempt 不增加
-hint_level 不增加
-Learning Event 不重复
+直接返回原 response_json
 ```
 
-Session 保存 `processed_event_ids` 作为当前 P0 防重复推进机制。
-
-## 2.6 Evidence Store
-
-SQLite：
+同一 `command_id` + 不同请求：
 
 ```text
-sessions
-learning_events
+409 command_id_conflict
 ```
 
-`learning_events` 是事实层。状态和 UI 都不得绕过 Controller 直接改写学习结果。
+### Optimistic Concurrency
+
+每个 Session 有 `version`。
+
+客户端 mutation 必须携带 `expected_version`。
+
+旧版本请求：
+
+```text
+409 state_conflict
+```
+
+正确性不再依赖 Python 进程锁。
+
+## 2.3 Runtime Security
+
+文件：
+
+```text
+apps/api/security.py
+apps/api/settings.py
+apps/api/runtime_errors.py
+```
+
+Session Start：
+
+```text
+随机 token
+↓
+明文只返回客户端一次
+↓
+SQLite 只保存 SHA-256(token)
+```
+
+后续 Session Read / Mutation：
+
+```http
+X-Session-Token: ...
+```
+
+Token 错误：`401 session_unauthorized`。
+
+Session 过期：`410 session_expired`。
+
+## 2.4 Runtime Governance
+
+### TTL
+
+默认 Demo Session TTL：由 `SESSION_TTL_SECONDS` 配置。
+
+Session 保存：
+
+```text
+created_at
+updated_at
+last_accessed_at
+expires_at
+```
+
+### Rate Limit
+
+SQLite fixed-window limiter：
+
+```text
+Session Start → client identity
+Learning Step → token hash
+```
+
+Rate Limit 状态在 SQLite 中共享，不依赖单个 Python 进程内存。
+
+### Cleanup
+
+```bash
+python scripts/cleanup_sessions.py --dry-run --max-sessions 100
+```
+
+支持：
+
+- 过期 Session；
+- 最大 Session 数；
+- dry-run；
+- FK cascade 清理 Events / Receipts。
+
+## 2.5 H5
+
+文件：
+
+```text
+apps/web/index.html
+apps/web/app.js
+apps/web/style.css
+```
+
+保持零 npm 运行依赖。
+
+客户端保存：
+
+```text
+session_id
+session_token
+```
+
+Mutation 保存并发送：
+
+```text
+command_id
+expected_version
+X-Session-Token
+```
+
+网络错误只使用原 Command 重试一次。409 时刷新服务器 Session，不在浏览器自行推进状态。
 
 ---
 
 # 3. 模块层
 
-## 3.1 API
+## 3.1 API Contract
 
 ```http
-GET  /api/v1/health
+GET  /api/v1/live
+GET  /api/v1/ready
+GET  /api/v1/health          # compatibility
 POST /api/v1/session/start
-GET  /api/v1/session/{session_id}
+GET  /api/v1/session/{id}
 POST /api/v1/learning/step
+GET  /api/v1/internal/session/{id}/integrity   # non-production only
 ```
 
-`learning/step` 请求：
+Learning Step：
 
 ```json
 {
-  "session_id": "...",
+  "session_id": "uuid",
   "event": "ANSWER_SUBMITTED",
-  "event_id": "uuid",
-  "payload": {"answer": "trapped"}
+  "event_id": "<session-id>:<request-id>",
+  "expected_version": 0,
+  "payload": {
+    "answer": "trapped"
+  }
 }
 ```
 
-## 3.2 H5
+Header：
 
-P0 实际实现：
+```http
+X-Session-Token: <token>
+```
+
+## 3.2 Health Contract
+
+`/live`：只证明进程可响应。
+
+`/ready`：验证：
+
+- SQLite 可查询；
+- 必要表存在；
+- Content Pack 已加载；
+- 当前 Policy 可识别。
+
+Docker HEALTHCHECK 使用 `/live`。
+
+部署流量切入前检查 `/ready`。
+
+## 3.3 Replay / Integrity
+
+非生产环境：
+
+```http
+GET /api/v1/internal/session/{id}/integrity
+```
+
+按 Command Events 重放 Reducer，并比较存储 Snapshot。
+
+Replay 只有在以下版本与当前 Reducer 一致时才执行：
 
 ```text
-apps/web/
-├─ index.html
-├─ app.js
-└─ style.css
+agent_policy_version
+content_pack_version
 ```
 
-采用零 npm 运行依赖 H5。FastAPI 直接托管静态文件。
-
-页面能力：
-
-- 启动 Gold Demo；
-- 显示当前学习阶段；
-- 真实提交答案；
-- 显示 `POINTER_ERROR`；
-- 显示最小提示；
-- 完成 3 道迁移验证；
-- 进入 `eruption`；
-- 展示最终 VERIFIED 状态；
-- LocalStorage 保存 Session ID；
-- 页面刷新后通过 Session API 恢复。
-
-## 3.3 Static Serving
-
-同一 FastAPI 服务提供：
+版本不匹配：
 
 ```text
-/
-/app.js
-/style.css
-/api/v1/*
+replay_supported = false
 ```
 
-## 3.4 Docker
+避免拿新策略错误重放旧 Session。
+
+## 3.4 Structured Logs
+
+成功 Mutation 记录：
 
 ```text
-python:3.12-slim
-↓
-pip install requirements
-↓
-copy apps + content
-↓
-uvicorn 0.0.0.0:8000
+command_id
+session_id
+learning_event
+state_after
+version_after
+duration_ms
+result
 ```
 
-GitHub Actions Docker Build 已成功。
-
----
-
-# 4. 测试体系
-
-## 4.1 Unit / Integration
-
-`tests/test_gold_loop.py`：
-
-1. 完整闭环；
-2. 非法状态跳转不污染 Events；
-3. 重复 `event_id` 不重复推进状态。
-
-本地实际：
+禁止记录：
 
 ```text
-3 passed
-```
-
-远端 GitHub Actions：PASS。
-
-## 4.2 Static Contract
-
-```bash
-python scripts/check_static.py
-```
-
-结果：
-
-```text
-STATIC_H5_OK
-```
-
-## 4.3 JS Syntax
-
-```bash
-node --check apps/web/app.js
-```
-
-本地与 GitHub Runner 均 PASS。
-
-## 4.4 Smoke
-
-```bash
-python scripts/smoke.py
-```
-
-实际：
-
-```text
-ANSWER_SUBMITTED -> RETRY
-ANSWER_SUBMITTED -> VERIFY
-VERIFY_ANSWER -> VERIFY
-VERIFY_ANSWER -> VERIFY
-VERIFY_ANSWER -> WORD_TASK
-WORD_ANSWER -> DONE
-CLOSED_LOOP ... events=19
-```
-
-## 4.5 API + Static Integration
-
-本地实测：
-
-```text
-GET /                  200
-GET /api/v1/health     200
+answer 原文
+session_token
 ```
 
 ---
 
-# 5. CI 真实回执
+# 4. 测试与审查门禁
 
-Workflow：`.github/workflows/ci.yml`
+## 4.1 当前 Test Suite
 
-主分支 Run：
+主分支当前覆盖至少：
+
+- Gold Loop；
+- Receipt Exact Replay；
+- Command ID 冲突；
+- stale version；
+- 非法状态跳转；
+- 输入 Schema；
+- SPA / API 边界；
+- 4 个 Transaction Fault Injection；
+- 两个 Store 并发；
+- Duplicate Command 并发；
+- Snapshot Tamper Detection；
+- Session Token；
+- Session Expiry；
+- SQLite Shared Rate Limit；
+- Cleanup / FK Cascade；
+- Capacity Cleanup；
+- Request Body Limit；
+- Production Trusted Hosts。
+
+当前 pytest：`16 passed`。
+
+## 4.2 CI
 
 ```text
-Run ID: 31412516711
-Head:   5bd2a49d8b481377c5e048c3b024b078bb6da727
-Event:  push
-```
-
-Jobs：
-
-```text
-test    SUCCESS   job 93533711270
-docker  SUCCESS   job 93533799332
-```
-
-`test` 内部全部成功：
-
-```text
-checkout
-setup-python
-setup-node
 pip install
-pytest -q
-scripts/smoke.py
-scripts/check_static.py
-node --check apps/web/app.js
+pip check
+compileall
+pytest
+Authenticated Smoke
+Static Contract
+Cleanup Dry-run
+JS Syntax
+Docker Build
+Docker Runtime
+/ready
+/live
+H5
+Session Token Start
+Container Cleanup Dry-run
 ```
 
-`docker` 内部全部成功：
+主分支 Run：`31429090745`。
 
-```text
-checkout
-setup-buildx
-docker/build-push-action build
-```
-
-因此当前 P0 的远端代码与容器门禁均为 PASS。
+Test / Docker 均 SUCCESS。
 
 ---
 
-# 6. 故障发现与修复记录
+# 5. 建设性 / 传统审查结论
 
-## R1｜Event Store 幂等不足
+本轮已经修正的维护性问题：
 
-症状：重复 `event_id` 虽不会重复落 Event，但可重复推进 Controller。
-
-修复：在 Session 中维护 `processed_event_ids`，状态变更前先做请求幂等判断。
-
-## R2｜Smoke import path
-
-症状：
-
-```text
-python scripts/smoke.py
-ModuleNotFoundError: No module named 'apps'
-```
-
-修复：脚本显式加入 repository root。
-
-## R3｜前端 npm 依赖成为 P0 外部故障面
-
-症状：验证环境无法稳定解析 Vue/Vite 依赖。
-
-修复：P0 改成 HTML + ES Module JS + CSS；学习契约与 API 不变。
-
-## R4｜GitHub Runner pytest import path
-
-症状：远端 CI 首轮 `pytest` 收集失败：
-
-```text
-ModuleNotFoundError: No module named 'apps'
-```
-
-修复：增加 `tests/conftest.py`，把 repository root 显式加入 `sys.path`。
-
-验证：PR Run `31412407887` 的 test + docker 均成功；随后主分支 Run `31412516711` 再次双 Job 成功。
+1. Controller 与数据库写入耦合 → `domain.py` / `store.py` 分离；
+2. `core.py` 继续膨胀 → 降为兼容导出；
+3. Python `RLock` 承担正确性 → SQLite Transaction + Version；
+4. 重试只返回 NOOP → 持久化 Response Receipt；
+5. Replay 默认相信当前策略 → 增加 Policy / Content Version Guard；
+6. Runtime Error 污染 Domain → 独立 `runtime_errors.py`；
+7. 测试依赖 import 顺序 → 统一 `tests/conftest.py`；
+8. Docker 只 build → runtime smoke；
+9. `/health` 混合 live/ready → 明确拆分；
+10. 无 Session 生命周期 → Token / TTL / Rate / Cleanup。
 
 ---
 
-# 7. P0 完成度
+# 6. 当前边界
 
-| Gate | 状态 | 证据 |
-|---|---|---|
-| Outcome Contract | PASS | Gold Content |
-| Deterministic Core | PASS | LearningController |
-| Error Diagnosis | PASS | POINTER_ERROR |
-| Minimal Intervention | PASS | 5-level hints |
-| Transfer Verification | PASS | 3/3 variants |
-| Learning Events | PASS | Smoke 19 events |
-| Request Idempotency | PASS | local + remote pytest |
-| Illegal Transition Guard | PASS | local + remote pytest |
-| H5 Vertical Slice | PASS | static contract + root 200 |
-| Session Restore Contract | PASS | Session API + LocalStorage |
-| Second Capability | PASS | word.root.rupt |
-| Smoke Closed Loop | PASS | DONE |
-| Remote CI | PASS | Run 31412516711 |
-| Docker Build | PASS | Job 93533799332 |
-| Public Deploy | BLOCKED | no usable deployment target in current connector |
+仍未伪装成完成的事项：
+
+1. 公网 Deployment 尚无真实 URL；
+2. 当前 Vercel 连接无可用 Team / Project；
+3. 反向代理后的真实客户端 IP 策略需随具体部署平台配置；应用不会任意信任 `X-Forwarded-For`；
+4. Content-Length 中间件不能替代入口代理对 chunked/streaming body 的硬上限；
+5. SQLite 适用于当前 Demo 规模，真正多实例高并发后再评估 PostgreSQL。
+
+这些边界不会通过引入 Redis / Kafka / 微服务来提前复杂化。
 
 ---
 
-# 8. 工程完成结论
-
-**P0 DEMO 开发闭环已经完成。**
-
-已形成：
+# 7. 当前完成判定
 
 ```text
-需求
-→ Gold Outcome Contract
-→ Deterministic Learning Core
-→ H5 Interaction
-→ Learning Evidence
-→ Local Tests
-→ Smoke
-→ Remote CI
-→ Docker Build
+Learning Closed Loop      PASS
+Atomic State              PASS
+Idempotent Receipt        PASS
+Optimistic Concurrency    PASS
+Crash Rollback            PASS
+Event Replay Integrity    PASS
+Session Auth              PASS
+Session TTL               PASS
+Shared Rate Limit         PASS
+Session Cleanup           PASS
+Production Config Guard   PASS
+Local Gates               PASS
+GitHub CI                 PASS
+Docker Runtime            PASS
+Public Deployment         BLOCKED_EXTERNAL
 ```
 
-当前唯一未取得真实回执的是公网部署。当前 Vercel 连接没有 Team/Project 上下文，部署工具的暴露 Schema 与运行时要求不一致，因此保持 `BLOCKED`，不伪造成功。
-
-后续新增功能必须保持 Gold Loop、GitHub CI、Docker Build 持续为绿。
+下一工程动作只剩：取得真实部署目标 → 配置持久 `/data`、`APP_ENV=production`、`TRUSTED_HOSTS` → Public Smoke → Release / Rollback。
