@@ -1,1008 +1,502 @@
-# 文科实验室 H5 DEMO 开发工程文档｜V2.3 第一性原理版
+# 文科实验室 H5 DEMO 工程母文档｜V2.4 实际实现版
 
-> 项目：AWKN-Lab/Learning-Agent  
-> 文档类型：工程母文档  
-> 上位依据：`docs/PRD.md`  
-> 日期：2026-08-11  
-> 目标版本：`v0.1.0-demo`
+> 状态：P0 Gold Loop 已实现并实测  
+> 目标版本：`v0.1.0-demo`  
+> 更新：2026-08-11  
+> 核心原则：先证明学习修复闭环，再扩 AI、框架和内容规模。
 
 ---
 
-# 1. 系统层：工程目标
+# 1. 系统层
 
-P0 只证明一件事：
+## 1.1 系统目标
 
-> 系统能够观察学生的真实操作，定位一个明确逻辑 Bug，实施最小干预，再通过迁移题验证修复成立。
+文科实验室当前只证明一件事：
 
-首个 Gold Node：
+> 系统可以观察学生操作，定位一个明确的逻辑错误，用最小提示让学生自己修正，再通过表层不同的新题证明修复成立，并把证据写入学习状态。
+
+P0 Gold Node：
 
 ```text
 relative_clause.pointer
 ```
 
-首个 Gold Loop：
+第二能力：
+
+```text
+eruption → e + rupt + ion
+```
+
+## 1.2 完成判定
 
 ```text
 TASK
 ↓
-ANSWER
+错误行为
 ↓
 POINTER_ERROR
-↓
-HINT
-↓
-RETRY
-↓
-VERIFY × 3
-↓
-VERIFIED
-↓
-UPDATE STATE
-```
-
-P0 工程完成必须同时满足：
-
-```text
-AI OFF 可运行
-LIVE 可运行
-MOCK 可运行
-FALLBACK 可运行
-```
-
----
-
-# 2. 系统层：第一性架构
-
-```text
-                  H5
-                   │
-                   ▼
-          LearningController
-                   │
-      ┌────────────┼────────────┐
-      ▼            ▼            ▼
- Task Model     Evaluator   Intervention
-      │            │            │
-      └────────────┼────────────┘
-                   ▼
-            Transfer Verify
-                   │
-                   ▼
-            Evidence Store
-                   │
-                   ▼
-            Learning State
-                   │
-                   ▼
-              Next Task
-```
-
-LLM 不处于主干：
-
-```text
-                  LLM
-          ┌────────┼─────────┐
-          ▼        ▼         ▼
-     Explanation Variant  Ambiguous
-                 Candidate Diagnosis
-```
-
-核心原则：
-
-```text
-Deterministic Core
-+
-Generative Enhancement
-```
-
----
-
-# 3. 系统层：技术选型
-
-## 3.1 Frontend
-
-继续使用：
-
-- Vue 3；
-- Vite；
-- TypeScript；
-- Pinia；
-- Vue Router；
-- ECharts；
-- GSAP / CSS Transition。
-
-P0 不迁移 React / Next.js / SvelteKit。
-
-## 3.2 Backend
-
-P0：
-
-```text
-Python 3.12
-FastAPI
-Pydantic v2
-SQLAlchemy 2.x
-SQLite
-```
-
-推荐 SQLAlchemy 2.x，避免 P0 同时维护 SQLModel / SQLAlchemy 两套习惯。
-
-## 3.3 AI Provider
-
-统一接口：
-
-```python
-class LLMProvider(Protocol):
-    async def generate(self, request): ...
-```
-
-实现：
-
-```text
-OpenAICompatibleProvider
-OllamaProvider
-MockProvider
-```
-
-业务代码禁止直接调用具体模型 SDK。
-
-## 3.4 P0 禁止依赖
-
-```text
-LangGraph
-pyKT Runtime
-FSRS Optimizer
-LlamaIndex
-Chroma
-Qdrant
-Neo4j
-Redis
-Kafka
-Celery
-Kubernetes
-Multi-Agent
-Full-textbook RAG
-OCR
-Auth System
-Teacher Admin
-```
-
----
-
-# 4. 系统层：仓库结构
-
-目标结构：
-
-```text
-Learning-Agent/
-├─ README.md
-├─ docs/
-│  ├─ PRD.md
-│  ├─ DEMO_ENGINEERING.md
-│  ├─ DEVELOPMENT_PLAN.md
-│  └─ FIRST_PRINCIPLES.md
-│
-├─ apps/
-│  ├─ web/
-│  │  └─ src/
-│  │     ├─ views/
-│  │     ├─ components/
-│  │     ├─ stores/
-│  │     ├─ services/
-│  │     └─ types/
-│  │
-│  └─ api/
-│     └─ app/
-│        ├─ main.py
-│        ├─ controller/
-│        ├─ task_models/
-│        ├─ evaluator/
-│        ├─ intervention/
-│        ├─ verification/
-│        ├─ state/
-│        ├─ events/
-│        ├─ providers/
-│        ├─ validation/
-│        └─ repositories/
-│
-├─ content/
-│  └─ v1.0_g10_english_u4/
-│     ├─ manifest.json
-│     ├─ tasks.json
-│     ├─ grammar.json
-│     ├─ roots.json
-│     ├─ variants.json
-│     └─ topology.json
-│
-├─ schemas/
-│  ├─ learning-event.schema.json
-│  ├─ task-model.schema.json
-│  ├─ student-model.schema.json
-│  ├─ evaluation-result.schema.json
-│  ├─ intervention.schema.json
-│  ├─ verification-result.schema.json
-│  └─ learning-state.schema.json
-│
-└─ tests/
-   ├─ gold_loop/
-   ├─ evaluator/
-   ├─ intervention/
-   ├─ verification/
-   ├─ api/
-   └─ e2e/
-```
-
-不提前创建空目录。每个目录在对应阶段有真实代码时建立。
-
----
-
-# 5. 组件层 A：Outcome Contract
-
-P0 开发第一步不先写数据库 Schema。
-
-先冻结学习结果定义。
-
-Gold Node：
-
-```text
-relative_clause.pointer
-```
-
-必须定义：
-
-```text
-Gold Task
-Gold Expected Model
-Gold Error
-Gold Intervention Ladder
-Gold Transfer Set
-Gold Pass Criteria
-```
-
-建议初始验收：
-
-```text
-初始任务 FAIL
 ↓
 最小提示
 ↓
-重试
+主任务修正
 ↓
-3 道新题验证
+3/3 Transfer Verification
 ↓
-满足预设通过条件
+relative_clause.pointer VERIFIED
 ↓
-VERIFIED
-```
-
-通过条件必须在内容包中显式版本化，不能由 LLM 临时判断。
-
----
-
-# 6. 组件层 B：Task Model
-
-## 6.1 职责
-
-把每个学习任务表示为机器可比较的逻辑结构。
-
-示例：
-
-```json
-{
-  "task_id": "rc_pointer_gold_001",
-  "node_id": "relative_clause.pointer",
-  "prompt": "The ruins in which they were trapped were dangerous.",
-  "expected": {
-    "antecedent": "the ruins",
-    "relative_word": "which",
-    "pointer": "which->the ruins"
-  }
-}
-```
-
-## 6.2 原则
-
-- 正确逻辑必须来自受控 Content Pack；
-- LLM 不决定标准答案；
-- 每个任务必须声明目标知识节点；
-- 每个任务必须声明可观察的学生动作。
-
----
-
-# 7. 组件层 C：Interaction Model
-
-UI 交互的目的不是好看，是暴露学生思维。
-
-P0 支持：
-
-```text
-点击
-拖动
-连线
-框选
-选择
-```
-
-学生动作必须能还原成 `StudentModel`。
-
-例：
-
-```json
-{
-  "task_id": "rc_pointer_gold_001",
-  "action": "link",
-  "source": "which",
-  "target": "trapped"
-}
-```
-
-得到：
-
-```text
-Student pointer = which → trapped
-```
-
----
-
-# 8. 组件层 D：Evaluator
-
-## 8.1 核心接口
-
-```python
-def evaluate(expected_model, student_model) -> EvaluationResult:
-    ...
-```
-
-## 8.2 输出
-
-```json
-{
-  "passed": false,
-  "error_code": "POINTER_ERROR",
-  "node_id": "relative_clause.pointer",
-  "expected": "which->the ruins",
-  "actual": "which->trapped",
-  "confidence": 1.0
-}
-```
-
-## 8.3 P0 Error Model
-
-```text
-POINTER_ERROR
-CONSTRAINT_OMISSION
-VARIABLE_SUBSTITUTION
-CAUSAL_CHAIN_BREAK
-OVERLOAD
-```
-
-Gold Loop 先真正实现 `POINTER_ERROR`。
-
-其他 Error Code 可定义 Schema，不要求 P0 同时做完全部行为。
-
-## 8.4 门禁
-
-Evaluator 必须独立于：
-
-- Agent；
-- LLM；
-- Frontend；
-- Database。
-
-它必须是可独立单测的确定性函数。
-
----
-
-# 9. 组件层 E：Intervention Policy
-
-## 9.1 核心接口
-
-```python
-def choose_intervention(error, attempts, hint_history) -> Intervention:
-    ...
-```
-
-## 9.2 提示阶梯
-
-```text
-P0 NONE
-P1 LOCATION
-P2 STRUCTURE
-P3 RELATION
-P4 PARTIAL_DERIVATION
-P5 FULL_EXPLANATION
-```
-
-## 9.3 Gold Node 示例
-
-P1：
-
-```text
-问题出在 which 的指向。
-```
-
-P2：
-
-```text
-先找 which 前面的名词性成分。
-```
-
-P3：
-
-```text
-which 在这里要回指先行词。
-```
-
-P4：
-
-```text
-先行词位于 relative clause 前面；把候选名词逐个代回检查。
-```
-
-P5：
-
-展示完整逻辑结构，但随后强制进入迁移验证。
-
-## 9.4 原则
-
-- 初错不直接给答案；
-- 每次最多升级一级；
-- 同一级提示不能无限重复；
-- P5 后仍不能直接 VERIFIED。
-
----
-
-# 10. 组件层 F：Transfer Verification
-
-## 10.1 定义
-
-修复成功必须由新任务证据支持。
-
-```text
-Original Error
+Word Logic Task
 ↓
-Intervention
+word.root.rupt VERIFIED
 ↓
-Transfer Set
-↓
-Verification Result
-```
-
-## 10.2 Gold Transfer Set
-
-首版固定 3 道人工审核变式。
-
-要求：
-
-- 表面句子不同；
-- 目标节点相同；
-- 一次只扰动一个关键变量；
-- 答案唯一；
-- 不复制原题；
-- 可确定性判定。
-
-## 10.3 AI 生成
-
-后续 LLM 可以生成 Candidate，但只能走：
-
-```text
-LLM Candidate
-↓
-Schema
-↓
-Grammar Rule
-↓
-Target Node Check
-↓
-Answer Uniqueness
-↓
-Scope Check
-↓
-PASS 后入题
-```
-
----
-
-# 11. 组件层 G：Evidence Model
-
-Gold Loop 跑通后再冻结数据 Schema。
-
-核心事实类型：
-
-```text
-LearningEvent
-TaskAttempt
-EvaluationResult
-Intervention
-VerificationResult
-LearningStateChange
-```
-
-## 11.1 LearningEvent
-
-建议字段：
-
-```text
-event_id
-schema_version
-user_id
-session_id
-task_id
-node_id
-event_type
-attempt_id
-correct
-error_code
-hint_level
-time_ms
-payload
-content_pack_version
-policy_version
-timestamp
-```
-
-## 11.2 幂等
-
-`event_id` 与 `attempt_id` 必须可去重。
-
-浏览器重试不得重复：
-
-- 计入错误；
-- 增加提示次数；
-- 修改学习状态。
-
----
-
-# 12. 组件层 H：Learning State
-
-P0 状态：
-
-```text
-UNKNOWN
-LEARNING
-WEAK
-PATCHING
-VERIFIED
-REVIEW_DUE
-```
-
-状态更新只能由明确事件触发。
-
-示例：
-
-```text
-POINTER_ERROR
-→ WEAK
-
-开始迁移验证
-→ PATCHING
-
-Transfer Pass
-→ VERIFIED
-```
-
-P0 不输出没有足够数据依据的小数 mastery / fragility 作为正式学习结论。
-
-如果为内部调试保留 score，必须标记为 heuristic，并带 policy_version。
-
----
-
-# 13. 组件层 I：LearningController
-
-对外产品名保持 Learning Agent。
-
-P0 内部主控：
-
-```text
-LearningController
-```
-
-## 13.1 六状态模型
-
-```text
-TASK
-ANSWER
-HINT
-RETRY
-VERIFY
 DONE
 ```
 
-## 13.2 主逻辑
+只有 `DONE` 且 Learning Events 包含 `error_diagnosed / patch_completed / word_verified / demo_completed`，才算 DEMO 闭环。
 
-```python
-if state == TASK:
-    present_task()
+## 1.3 系统架构
 
-elif state == ANSWER:
-    result = evaluate()
-    if result.passed:
-        enter_verify_if_needed()
-    else:
-        enter_hint()
-
-elif state == HINT:
-    intervention = choose_intervention()
-
-elif state == RETRY:
-    result = evaluate()
-
-elif state == VERIFY:
-    result = verify_transfer()
-
-elif state == DONE:
-    update_state_and_select_next()
+```text
+Browser H5
+    │
+    ▼
+FastAPI
+    │
+    ▼
+LearningController
+ ┌──┼──────────────────────┐
+ ▼  ▼                      ▼
+Task Model             Evaluator
+                         │
+                         ▼
+                Intervention Policy
+                         │
+                         ▼
+                Transfer Verification
+                         │
+                         ▼
+                    SQLite Store
+                  ┌──────┴──────┐
+                  ▼             ▼
+             Sessions     Learning Events
+                                  │
+                                  ▼
+                           Learning State
 ```
 
-P0 不做开放式自主 Planning。
+LLM 当前不参与正确性判断。
 
 ---
 
-# 14. API 设计
+# 2. 组件层
 
-H5 正式主接口收敛为：
+## 2.1 Content / Task Model
+
+目录：
 
 ```text
-POST /api/v1/session/start
-POST /api/v1/learning/step
-GET  /api/v1/session/{session_id}
-GET  /api/v1/health
+content/
+├─ gold_relative_clause_pointer.json
+└─ word_eruption.json
 ```
 
-## 14.1 learning/step
+Gold Content 固定：
 
-输入：
+- 主任务 1 道；
+- `POINTER_ERROR` 1 个目标错误；
+- 分层提示 5 级；
+- Transfer Variant 3 道；
+- 成功条件 `3/3`；
+- 第二能力 `word.root.rupt`。
+
+正确答案和迁移标准全部由 Content 定义，不依赖 LLM 自由生成。
+
+## 2.2 Evaluator
+
+主任务：
+
+```text
+expected = ruins
+actual != ruins
+→ POINTER_ERROR
+```
+
+迁移题分别验证：
+
+```text
+house
+city
+room
+```
+
+任何迁移题失败都停留在当前 Variant，不允许跳过。
+
+## 2.3 Intervention Policy
+
+主任务每失败一次只提升一级提示：
+
+```text
+P1 错误位置
+P2 结构线索
+P3 回指关系
+P4 先行词定义
+P5 完整结构
+```
+
+第一次错误不直接给完整答案。
+
+## 2.4 Transfer Verification
+
+成功标准：
+
+```text
+pointer-v1 PASS
+pointer-v2 PASS
+pointer-v3 PASS
+```
+
+全部通过后：
+
+```text
+relative_clause.pointer:
+LEARNING → VERIFIED
+```
+
+## 2.5 LearningController
+
+当前状态：
+
+```text
+TASK
+RETRY
+VERIFY
+WORD_TASK
+DONE
+```
+
+允许事件：
+
+```text
+TASK / RETRY + ANSWER_SUBMITTED
+VERIFY      + VERIFY_ANSWER
+WORD_TASK   + WORD_ANSWER
+```
+
+非法状态跳转返回 HTTP `409`，且不得写入 Learning Events。
+
+## 2.6 幂等
+
+客户端每次提交携带：
+
+```text
+event_id
+```
+
+Controller 保存：
+
+```text
+processed_event_ids
+```
+
+相同 `event_id` 重复提交：
+
+```text
+ui_action = NOOP
+attempt 不增加
+hint_level 不增加
+Learning Event 不重复
+```
+
+---
+
+# 3. 模块层
+
+## 3.1 API
+
+### 健康检查
+
+```http
+GET /api/v1/health
+```
+
+### 开始 Session
+
+```http
+POST /api/v1/session/start
+```
+
+### 恢复 Session
+
+```http
+GET /api/v1/session/{session_id}
+```
+
+返回 Session、当前任务与完整 Events。
+
+### 推进学习状态
+
+```http
+POST /api/v1/learning/step
+```
+
+请求：
 
 ```json
 {
-  "session_id": "s1",
+  "session_id": "...",
   "event": "ANSWER_SUBMITTED",
-  "attempt_id": "a1",
+  "event_id": "uuid",
   "payload": {
-    "source": "which",
-    "target": "trapped"
+    "answer": "trapped"
   }
 }
 ```
 
-输出：
+## 3.2 Persistence
 
-```json
-{
-  "state": "HINT",
-  "evaluation": {
-    "passed": false,
-    "error_code": "POINTER_ERROR"
-  },
-  "intervention": {
-    "level": "P1",
-    "message": "问题出在 which 的指向。"
-  },
-  "next_expected_event": "RETRY_SUBMITTED",
-  "trace_id": "..."
-}
+SQLite 两张核心表：
+
+```text
+sessions
+learning_events
 ```
 
-客户端不得直接修改学习状态。
+`learning_events` 是事实源。
+
+当前 `node_status / word_status` 是 Session 派生状态；后续扩展长期用户状态时，优先由 Events 重建。
+
+## 3.3 H5
+
+P0 前端实际实现：
+
+```text
+apps/web/
+├─ index.html
+├─ app.js
+└─ style.css
+```
+
+采用零依赖 H5，原因：Gold Demo 的目标与 npm/Vite/Vue 无关；真实构建验证中外部 npm 镜像无法解析 Vue/Vite，继续保留该依赖只会增加不可控故障面。
+
+页面能力：
+
+- 开始 Gold Demo；
+- 展示当前学习状态；
+- 提交真实选项；
+- 展示 `POINTER_ERROR`；
+- 展示最小提示；
+- 连续完成 3 个 Transfer Variant；
+- 进入 `eruption`；
+- 展示最终 VERIFIED 状态；
+- LocalStorage 保存 `session_id`；
+- 刷新后通过 API 恢复当前 Session。
+
+## 3.4 Static Serving
+
+FastAPI 在所有 `/api/v1/*` 路由注册后挂载：
+
+```text
+apps/web
+```
+
+因此同一服务同时提供：
+
+```text
+/
+/app.js
+/style.css
+/api/v1/*
+```
+
+不需要单独前端服务器。
 
 ---
 
-# 15. AI Enhancement
+# 4. 测试与门禁
 
-AI 接入发生在无 AI Gold Loop 通过之后。
+## 4.1 pytest
 
-## 15.1 Explanation
+`tests/test_gold_loop.py` 当前覆盖：
 
-输入已确认结构，输出自然语言说明。
+1. 完整学习闭环；
+2. 非法状态跳转不污染 Events；
+3. 重复请求 Controller 幂等。
 
-## 15.2 Variant Candidate
+实际回执：
 
-只生成候选题，不直接进入正式验证集。
+```text
+3 passed
+```
 
-## 15.3 Ambiguous Diagnosis
+## 4.2 Static H5 Contract
 
-只有规则置信度不足时调用。
+```bash
+python scripts/check_static.py
+```
 
-低置信度 AI 诊断不能直接改变长期状态。
+实际回执：
 
-## 15.4 Runtime Scope Guard
+```text
+STATIC_H5_OK
+```
 
-静态 Content Pack 在构建期校验。
+## 4.3 JavaScript Syntax
 
-运行期 Grade Scope Guard 只拦截动态 AI 内容，避免所有路径重复做不必要检查。
+```bash
+node --check apps/web/app.js
+```
+
+实际：exit code `0`。
+
+## 4.4 API + Static Integration
+
+实测：
+
+```text
+GET /                  200
+GET /api/v1/health     200
+```
+
+## 4.5 Smoke
+
+```bash
+python scripts/smoke.py
+```
+
+实际路径：
+
+```text
+ANSWER_SUBMITTED -> RETRY
+ANSWER_SUBMITTED -> VERIFY
+VERIFY_ANSWER -> VERIFY
+VERIFY_ANSWER -> VERIFY
+VERIFY_ANSWER -> WORD_TASK
+WORD_ANSWER -> DONE
+CLOSED_LOOP ... events=19
+```
+
+## 4.6 CI
+
+`.github/workflows/ci.yml` 定义：
+
+```text
+pytest
+↓
+smoke
+↓
+static contract
+↓
+node syntax
+↓
+Docker build
+```
+
+当前 GitHub 集成无法读取 Actions 权限，远端 Actions 尚无真实 Run 回执；不得写成 CI PASS。
 
 ---
 
-# 16. Content Pack
+# 5. 运行与部署
 
-```text
-content/v1.0_g10_english_u4/
+## 5.1 本地
+
+```bash
+pip install -r requirements.txt
+uvicorn apps.api.app:app --host 0.0.0.0 --port 8000
 ```
 
-首期包含：
+打开：
 
 ```text
-Gold grammar task
-Gold transfer set
-Unit4 roots
-Word task: eruption
-必要 grammar rules
-knowledge nodes
-knowledge edges
+http://127.0.0.1:8000
 ```
 
-公开仓库优先使用自编、模拟或授权内容。
+## 5.2 Docker
+
+仓库包含 `Dockerfile`：
+
+```text
+python:3.12-slim
+→ pip install
+→ copy apps + content
+→ uvicorn :8000
+```
+
+当前执行环境没有 Docker CLI，因此 Docker Build 尚未取得真实本地回执。
+
+## 5.3 公网 Deploy
+
+当前 Vercel 连接：
+
+- `list_teams` 返回空；
+- 无可用 Project 创建入口；
+- deploy 工具运行时要求的参数与暴露 Schema 不一致。
+
+所以公网 Deploy 当前属于**外部工具阻塞**，不伪造成功状态。
 
 ---
 
-# 17. H5 Vertical Slice
+# 6. P0 当前完成度
 
-第一版只要求四个核心页面：
-
-```text
-/today
-/task
-/repair
-/result
-```
-
-## /today
-
-显示：
-
-- 当前学习节点；
-- 为什么出现这个任务；
-- 当前状态。
-
-## /task
-
-承载真实操作，输出 StudentModel。
-
-## /repair
-
-显示当前错误位置、提示、重试、迁移验证。
-
-## /result
-
-显示：
-
-- 本轮修复结果；
-- 支持结果的验证证据；
-- 下一任务。
-
-等垂直切片完成后再拆出 `/lab/word`、`/topology`、`/assets`。
+| Gate | 状态 | 证据 |
+|---|---|---|
+| Outcome Contract | PASS | Gold Content |
+| Deterministic Core | PASS | Controller + Content |
+| Error Diagnosis | PASS | POINTER_ERROR |
+| Minimal Intervention | PASS | 5-level hints |
+| Transfer Verification | PASS | 3/3 variants |
+| Learning Events | PASS | Smoke 19 events |
+| Request Idempotency | PASS | pytest |
+| Illegal Transition Guard | PASS | pytest |
+| H5 Vertical Slice | PASS | root 200 + static check |
+| Session Restore Contract | PASS | GET session + LocalStorage |
+| Second Capability | PASS | word.root.rupt |
+| Smoke Closed Loop | PASS | DONE |
+| Remote CI | BLOCKED | GitHub Actions integration permissions |
+| Docker Build | UNVERIFIED | current runtime has no Docker CLI |
+| Public Deploy | BLOCKED | Vercel connector/project context |
 
 ---
 
-# 18. 第二条能力：Word Logic
+# 7. 下一阶段边界
 
-Gold Grammar Loop 稳定后接：
+在远端基础设施解锁前，不扩展产品功能。
+
+代码侧下一阶段只允许：
+
+1. 修复真实测试发现的问题；
+2. 增加浏览器级 E2E；
+3. 增加 Content Validator；
+4. 将 Learning State 从 Session JSON 独立成可重建投影；
+5. 再评估 LLM Explanation / Variant Candidate。
+
+继续禁止：
 
 ```text
-eruption
-→ e + rupt + ion
+LangGraph
+Multi-Agent
+RAG
+Vector DB
+Neo4j
+Redis
+pyKT Runtime
+FSRS Optimizer
+教师后台
+账号系统
 ```
-
-目的：验证同一系统内核可以服务另一种学习任务。
-
-Word Task 同样必须存在：
-
-```text
-Task Model
-Student Action
-Evaluator
-Intervention
-Transfer Verification
-Learning State
-```
-
-禁止为了展示丰富度做一堆只可观看、不可诊断的动画。
 
 ---
 
-# 19. Topology
+# 8. 工程完成结论
 
-Topology 的数据流：
-
-```text
-Learning Events
-↓
-Learning State
-↓
-Topology Projection
-```
-
-P0 SQLite 表即可：
+P0 Gold Demo 的**代码学习闭环已经完成并实测通过**：
 
 ```text
-knowledge_nodes
-knowledge_edges
-user_node_state
+Observe
+→ Diagnose
+→ Intervene
+→ Verify
+→ Update
+→ Next Capability
+→ DONE
 ```
 
-前端 ECharts 展示。
-
-Topology 不是事实源。
-
----
-
-# 20. 测试体系
-
-## 20.1 Gold Loop Unit Test
-
-至少覆盖：
-
-- 正确 pointer；
-- 错误 pointer；
-- 第一次错误提示 P1；
-- 连续错误提示升级；
-- 迁移题通过；
-- 迁移题失败；
-- P5 后仍需验证。
-
-## 20.2 API Test
-
-覆盖：
-
-- session start；
-- answer submit；
-- retry；
-- verify；
-- 重复 attempt_id；
-- 非法状态跳转。
-
-## 20.3 E2E
-
-E2E-001：AI OFF Gold Loop  
-E2E-002：LIVE 模型增强成功  
-E2E-003：LLM timeout → FALLBACK  
-E2E-004：低置信度 AI 诊断不污染状态  
-E2E-005：WAIT/REPAIR/VERIFY 刷新恢复  
-E2E-006：重复提交幂等  
-E2E-007：客户端越级更新状态被拒绝。
-
----
-
-# 21. 可观测性
-
-每次学习步骤记录 Trace：
-
-```text
-trace_id
-session_id
-state_before
-event
-state_after
-evaluation
-intervention
-provider
-mode
-duration_ms
-ok
-error
-```
-
-建立：
-
-```text
-docs/RUN_EVIDENCE.md
-```
-
-正式演示必须能证明一条链是真实 LIVE、MOCK 或 FALLBACK。
-
----
-
-# 22. CI
-
-顺序：
-
-```text
-Lint
-↓
-Type Check
-↓
-Gold Content Validation
-↓
-Evaluator Unit Test
-↓
-Intervention Unit Test
-↓
-Verification Unit Test
-↓
-State Test
-↓
-API Test
-↓
-Frontend Build
-↓
-E2E
-↓
-Demo Smoke
-```
-
-任何门禁失败停止 Release。
-
----
-
-# 23. Release / Deploy / Git / Rollback
-
-发布链：
-
-```text
-CI
-↓
-Release
-↓
-Deploy
-↓
-Git 固化
-↓
-Rollback 验证
-```
-
-目标版本：
-
-```text
-v0.1.0-demo
-```
-
-Release 记录：
-
-```text
-commit
-schema_version
-content_pack_version
-policy_version
-provider
-CI result
-E2E result
-known limitations
-```
-
-Rollback 必须真实演练，不能只写文档。
-
----
-
-# 24. 工程完成定义
-
-只有下列闭环全部真实成立才算 P0 完成：
-
-```text
-Outcome Contract
-↓
-Gold Task
-↓
-Observable Student Action
-↓
-Deterministic Evaluation
-↓
-Minimal Intervention
-↓
-Retry
-↓
-Transfer Verification
-↓
-Evidence Event
-↓
-Learning State Update
-↓
-Next Task
-↓
-AI OFF / LIVE / MOCK / FALLBACK
-↓
-E2E
-↓
-CI
-↓
-Release
-↓
-Deploy
-↓
-Git
-↓
-Rollback
-↓
-Run Evidence
-```
-
-到这里停止扩功能，用真实学生操作和比赛演示验证产品。
+当前剩余项属于远端 CI / 容器 / 公网部署基础设施验证，不属于学习闭环功能缺失。任何后续开发都应先保持这条链持续为绿。

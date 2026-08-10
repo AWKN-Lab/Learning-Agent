@@ -2,140 +2,104 @@
 
 面向理科思维型高中生的 AI 学习 Agent / 学习调试系统。
 
-文科实验室关注一个核心问题：**学生为什么做错，系统能否定位推理链中断的位置，用最小信息帮助他自己修复，再用新题证明修复成立。**
+核心问题：**学生为什么做错，系统能否定位推理链中断的位置，用最小信息帮助他自己修复，再用新题证明修复成立。**
 
-## 核心闭环
+## 当前状态
+
+`v0.1.0-demo` 的 P0 Gold Loop 已实现并完成真实运行验证：
 
 ```text
-Observe
-↓
-Diagnose
-↓
-Intervene
-↓
-Verify
-↓
-Update
+TASK
+→ 学生错误选择 trapped
+→ POINTER_ERROR
+→ 最小提示
+→ 学生修正 ruins
+→ 3 道迁移题全部通过
+→ relative_clause.pointer = VERIFIED
+→ eruption 词根任务
+→ rupt = VERIFIED
+→ DONE / CLOSED_LOOP
 ```
 
-工程主干：
+当前统一门禁回执：
+
+```text
+pytest                     3 passed
+static H5 contract         STATIC_H5_OK
+node --check app.js        PASS
+smoke closed loop          DONE
+learning events            19
+```
+
+## 第一性原理架构
 
 ```text
 Task Model
-+
+↓
+Observe Student Action
+↓
 Evaluator
-+
+↓
 Intervention Policy
-+
+↓
 Transfer Verification
-+
+↓
+Learning Events
+↓
 Learning State
-```
-
-LLM 作为增强层，不作为正确性主干。
-
-## 当前范围
-
-- MVP：高一英语，必修一 Unit 4
-- Gold Node：`relative_clause.pointer`
-- 第二能力：`eruption → e + rupt + ion`
-- 产品形态：移动端 H5 + Learning Agent
-- 前端：Vue 3 + Vite + TypeScript + Pinia + ECharts
-- 后端：FastAPI + Pydantic v2 + SQLAlchemy 2.x + SQLite
-- 主控：LearningController
-- 数据事实层：Learning Events
-
-## 母文档
-
-- [PRD V2.3 第一性原理版](docs/PRD.md)
-- [DEMO 工程母文档 V2.3](docs/DEMO_ENGINEERING.md)
-- [第一性原理重构决策](docs/FIRST_PRINCIPLES.md)
-- [详细开发执行计划](docs/DEVELOPMENT_PLAN.md)
-
-## P0 开发路线
-
-```text
-P0-0 Outcome Contract
-↓
-P0-1 Gold Learning Loop（AI OFF）
-↓
-P0-2 Interaction Model
-↓
-P0-3 Evidence Model
-↓
-P0-4 Persistence + Learning State
-↓
-P0-5 LearningController
-↓
-P0-6 H5 Vertical Slice
-↓
-P0-7 AI Enhancement
-↓
-P0-8 Word Logic Loop
-↓
-P0-9 Topology Projection
-↓
-P0-10 E2E / Reliability
-↓
-P0-11 CI
-↓
-P0-12 Release
-↓
-P0-13 Deploy
-↓
-P0-14 Git
-↓
-P0-15 Rollback
-```
-
-## Gold Demo
-
-```text
-The ruins in which they were trapped were dangerous.
-↓
-学生错误连接 which
-↓
-POINTER_ERROR
-↓
-最小提示
-↓
-重试
-↓
-3 道迁移题
-↓
-VERIFIED
-↓
-Learning State 更新
 ↓
 Next Task
 ```
 
-## AI 边界
+LLM 不在正确性主干中。P0 即使 AI OFF，Gold Loop 仍完整成立。
 
-P0 要求 AI OFF 时 Gold Loop 仍可成立。
+## P0 技术基线
 
-LLM 只用于：
+- H5：HTML + ES Module JavaScript + CSS，零 npm 运行依赖；
+- API：FastAPI + Pydantic；
+- 状态：SQLite；
+- 主控：Deterministic `LearningController`；
+- 事实源：`learning_events`；
+- 部署形态：FastAPI 同时托管 API 与静态 H5；
+- 容器：Python 3.12 Dockerfile。
 
-- Explanation；
-- Variant Candidate；
-- Ambiguous Diagnosis。
+前端零依赖决策见 [`docs/ADR-001-P0-ZERO-DEPENDENCY-H5.md`](docs/ADR-001-P0-ZERO-DEPENDENCY-H5.md)。
 
-LLM 不决定标准答案，不绕过验证层写入长期学习状态。
+## 本地运行
+
+```bash
+pip install -r requirements.txt
+uvicorn apps.api.app:app --host 0.0.0.0 --port 8000
+```
+
+打开：`http://127.0.0.1:8000`
+
+## 验证
+
+```bash
+pytest -q
+python scripts/check_static.py
+node --check apps/web/app.js
+python scripts/smoke.py
+```
+
+## 文档
+
+- [PRD](docs/PRD.md)
+- [第一性原理决策](docs/FIRST_PRINCIPLES.md)
+- [工程母文档 V2.4](docs/DEMO_ENGINEERING.md)
+- [详细开发计划](docs/DEVELOPMENT_PLAN.md)
+- [运行证据](docs/RUN_EVIDENCE.md)
 
 ## P0 依赖门禁
 
-默认不引入：LangGraph、pyKT Runtime、FSRS Optimizer、LlamaIndex、Chroma、Qdrant、Neo4j、Redis、Kafka、Celery、Kubernetes、多 Agent、全教材 RAG、OCR、账号系统、教师后台。
+默认不引入 LangGraph、pyKT Runtime、FSRS Optimizer、LlamaIndex、Chroma、Qdrant、Neo4j、Redis、Kafka、Celery、Kubernetes、多 Agent、全教材 RAG、OCR、账号系统、教师后台。
 
-只有出现明确、可复现、阻塞当前 Gold Loop 的问题，并有测试与回退方案时才解禁。
+## 当前外部基础设施状态
 
-## 工程原则
+代码闭环已经实测完成。远端基础设施仍有两个环境限制：
 
-1. Outcome Contract 先于大规模 Schema。
-2. 无 AI Gold Loop 先于 LLM 集成。
-3. 交互必须暴露学生思维。
-4. 确定性 Evaluator 决定学习正确性。
-5. 最小干预先于完整解释。
-6. 修复必须经过迁移验证。
-7. Learning Events 是事实源；Learning State 和 Topology 是派生结果。
-8. 每次提交保持可运行、可验证、可回退。
-9. 发布链必须走完 CI → Release → Deploy → Git → Rollback。
+1. 当前 GitHub 集成无法读取 Actions 权限，Actions API 返回 `403 Resource not accessible by integration`，仓库未产生远端 Workflow Run；
+2. 当前 Vercel 连接没有 Team/Project 上下文，部署工具契约也缺少可用的项目创建入口。
+
+因此：**代码运行闭环已完成；远端 CI/公网 Deploy 尚未取得真实成功回执，不标记为通过。**
