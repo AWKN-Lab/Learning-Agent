@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: '20'
       - run: pip install -r requirements.txt
+      - run: pip check
+      - run: python -m compileall -q apps scripts tests
       - run: pytest -q
       - run: python scripts/smoke.py
       - run: python scripts/check_static.py
@@ -34,4 +36,21 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: learning-agent:ci
+      - name: Docker runtime smoke
+        run: |
+          set -euo pipefail
+          docker run -d --name learning-agent-ci -p 18000:8000 learning-agent:ci
+          trap 'docker logs learning-agent-ci || true; docker rm -f learning-agent-ci >/dev/null 2>&1 || true' EXIT
+          ready=0
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:18000/api/v1/health >/tmp/health.json; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = "1"
+          grep -q '"status":"ok"' /tmp/health.json
+          curl -fsS http://127.0.0.1:18000/ | grep -q '文科实验室'
