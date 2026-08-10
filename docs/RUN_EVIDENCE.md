@@ -1,126 +1,21 @@
-# RUN EVIDENCE｜Learning-Agent v0.1.0-demo
+# RUN EVIDENCE｜Learning-Agent v0.2.0-hardening baseline
 
 > 验证日期：2026-08-11  
 > 模式：Deterministic / AI OFF  
-> 主分支已验证 Commit：`5bd2a49d8b481377c5e048c3b024b078bb6da727`
+> 代码基线：`15edeab92a495300a31d6475f865ed9ea5c0f5e0`
 
-## 1. 本地统一门禁
-
-执行：
-
-```bash
-python -m pytest -q
-python scripts/check_static.py
-node --check apps/web/app.js
-python scripts/smoke.py
-```
-
-真实回执：
-
-```text
-...                                                                      [100%]
-3 passed
-STATIC_H5_OK
-ANSWER_SUBMITTED -> RETRY
-ANSWER_SUBMITTED -> VERIFY
-VERIFY_ANSWER -> VERIFY
-VERIFY_ANSWER -> VERIFY
-VERIFY_ANSWER -> WORD_TASK
-WORD_ANSWER -> DONE
-CLOSED_LOOP ... events=19
-```
-
-`node --check apps/web/app.js` exit code：`0`。
-
-## 2. API / Static Integration
-
-```text
-GET /                  200
-GET /api/v1/health     200  {status: ok, mode: deterministic}
-```
-
-## 3. Remote CI
-
-### 首轮 PR 探针
-
-PR #1 用于真实触发远端 Actions。
-
-首轮 Run：`31412237285`
-
-结果：
-
-```text
-test = FAILURE
-```
-
-根因：
-
-```text
-pytest collection
-→ ModuleNotFoundError: No module named 'apps'
-```
-
-修复：增加 `tests/conftest.py`，显式将 repository root 加入 Python import path。
-
-### 修复后 PR 验证
-
-Run：`31412407887`
-
-```text
-test    SUCCESS
-docker  SUCCESS
-```
-
-### 主分支最终验证
-
-Run：`31412516711`
-
-Head：
-
-```text
-5bd2a49d8b481377c5e048c3b024b078bb6da727
-```
-
-Jobs：
-
-```text
-test    SUCCESS   93533711270
-docker  SUCCESS   93533799332
-```
-
-`test` Job 内部：
-
-```text
-checkout                         SUCCESS
-setup-python                     SUCCESS
-setup-node                       SUCCESS
-pip install -r requirements.txt  SUCCESS
-pytest -q                        SUCCESS
-python scripts/smoke.py          SUCCESS
-python scripts/check_static.py   SUCCESS
-node --check apps/web/app.js     SUCCESS
-```
-
-`docker` Job 内部：
-
-```text
-checkout                         SUCCESS
-docker/setup-buildx-action       SUCCESS
-docker/build-push-action         SUCCESS
-```
-
-## 4. 闭环证据
+## 1. 学习闭环
 
 ```text
 TASK
 → wrong: trapped
 → POINTER_ERROR
-→ RETRY
+→ minimum hint
 → correct: ruins
 → VERIFY
-→ pointer-v1: house PASS
-→ pointer-v2: city PASS
-→ pointer-v3: room PASS
+→ pointer-v1 PASS
+→ pointer-v2 PASS
+→ pointer-v3 PASS
 → relative_clause.pointer VERIFIED
 → WORD_TASK
 → rupt PASS
@@ -128,61 +23,185 @@ TASK
 → DONE
 ```
 
-Learning Events：19 条。
-
-关键事件包含：
+Authenticated Smoke：
 
 ```text
-error_diagnosed
-hint_given
-variant_answered
-patch_completed
-learning_state_updated
-next_task_selected
-word_verified
-demo_completed
+ANSWER_SUBMITTED -> RETRY v 1
+ANSWER_SUBMITTED -> VERIFY v 2
+VERIFY_ANSWER -> VERIFY v 3
+VERIFY_ANSWER -> VERIFY v 4
+VERIFY_ANSWER -> WORD_TASK v 5
+WORD_ANSWER -> DONE v 6
+CLOSED_LOOP ... events=19 receipts=6
 ```
 
-## 5. 边界验证
+## 2. P1-0 / P1-1 / P1-2｜状态完整性
 
-### Illegal Transition
+完成：
 
-`TASK` 状态直接提交 `VERIFY_ANSWER`：
+- Pure `LearningController.reduce()`；
+- Command / Events / Session / Receipt 单 SQLite Transaction；
+- Exact Receipt Replay；
+- `expected_version` Optimistic Concurrency；
+- 4 个 Fault Injection Rollback；
+- 两个 Store 实例并发；
+- Duplicate Command 并发；
+- Event Replay / Integrity Check；
+- Policy / Content Version Replay Guard。
+
+主分支代码：`d2f00d3f7d7086b69ee612857b65454214553ac0`。
+
+GitHub Actions：`31427875056`。
 
 ```text
-HTTP 409
-Learning Events 数量不变化
+test    SUCCESS
+docker  SUCCESS
 ```
 
-### Request Idempotency
+## 3. P1 Runtime Governance
 
-相同 `event_id` 重复提交：
+完成：
+
+- Session Token；
+- Token Hash at Rest；
+- Session TTL；
+- `last_accessed_at`；
+- SQLite Shared Rate Limit；
+- Session Cleanup；
+- max-sessions Capacity；
+- Production Trusted Host Guard；
+- Request Content-Length Gate；
+- `/live` / `/ready`；
+- Structured Mutation Logs；
+- Docker readiness / auth / cleanup smoke。
+
+代码基线：`15edeab92a495300a31d6475f865ed9ea5c0f5e0`。
+
+PR #4 CI：`31428953782`。
 
 ```text
-第二次 ui_action = NOOP
-attempt 不增加
-hint_level 不增加
-raw Learning Event 只有 1 条
+test    SUCCESS
+docker  SUCCESS
 ```
 
-## 6. 本轮发现并修复
-
-1. Controller 请求级幂等缺口；
-2. Smoke Script repository import path；
-3. Vue/Vite/npm 对 P0 的不必要外部依赖；
-4. GitHub Runner pytest import path。
-
-上述问题均已形成代码修复并经过门禁验证。
-
-## 7. 当前结论
+主分支 CI：`31429090745`。
 
 ```text
-P0 Learning Demo Closed Loop  PASS
-Local Tests                   PASS
-Local Smoke                   PASS
-Remote CI                     PASS
-Docker Build                  PASS
-Public Deploy                 BLOCKED
+test    SUCCESS
+docker  SUCCESS
 ```
 
-公网部署尚无真实成功回执：当前 Vercel 连接没有可用 Team/Project 上下文，部署工具 Schema 与运行时参数契约不一致。
+Test Job 已执行：
+
+```text
+pip check                         SUCCESS
+compileall                        SUCCESS
+pytest -q                         SUCCESS (16 tests)
+authenticated smoke              SUCCESS
+static H5 contract               SUCCESS
+cleanup dry-run                  SUCCESS
+node --check                     SUCCESS
+```
+
+Docker Job 已执行：
+
+```text
+Docker build                     SUCCESS
+container start                  SUCCESS
+GET /api/v1/ready                SUCCESS
+GET /api/v1/live                 SUCCESS
+GET /                            SUCCESS
+POST /api/v1/session/start       SUCCESS + session_token
+container cleanup dry-run        SUCCESS
+```
+
+## 4. 原子事务证据
+
+故障注入位置：
+
+```text
+after_command_event
+after_events
+before_session_update
+before_receipt
+```
+
+每个位置均要求：
+
+```text
+Session Snapshot 不变化
+Learning Events 不残留
+Receipt 不残留
+```
+
+结果：PASS。
+
+## 5. 并发证据
+
+### 不同 Command / 同旧 Version
+
+两个独立 Store 实例同时提交：
+
+```text
+1 个成功
+1 个 StateConflict
+最终 version = 1
+只产生 1 个 Command Receipt
+```
+
+结果：PASS。
+
+### 相同 Command 并发
+
+```text
+两个请求返回相同 Receipt
+状态只推进一次
+Receipt 只有一条
+```
+
+结果：PASS。
+
+## 6. Session 安全证据
+
+- 不带 Token：401；
+- 错 Token：401；
+- 正确 Token：200；
+- SQLite 中保存值 = SHA-256(token)；
+- SQLite 中不存在 Token 明文；
+- 过期 Session：410；
+- Production `TRUSTED_HOSTS` 缺失：启动配置拒绝；
+- Production `TRUSTED_HOSTS=*`：拒绝。
+
+## 7. 生命周期证据
+
+Cleanup：
+
+```text
+--dry-run         只返回候选，不删除
+expired           可清理
+max-sessions      可裁剪历史 Session
+FK cascade        Events / Receipts 随 Session 清理
+```
+
+CI 与 Docker 内均执行 dry-run 门禁。
+
+## 8. 当前结论
+
+```text
+Learning Demo Closed Loop    PASS
+Atomic Transaction           PASS
+Receipt Replay               PASS
+Optimistic Concurrency       PASS
+Crash Rollback               PASS
+Event Replay Integrity       PASS
+Session Authentication       PASS
+Session TTL                  PASS
+Shared Rate Limit            PASS
+Cleanup / Capacity           PASS
+Production Config Guard      PASS
+Remote CI                    PASS
+Docker Runtime               PASS
+Public Deploy                BLOCKED_EXTERNAL
+```
+
+公网 Deployment 暂无真实成功回执。当前 Vercel 连接无 Team / Project 上下文；因此保持 `BLOCKED_EXTERNAL`，不伪造 URL、Release 或生产 Rollback 回执。
