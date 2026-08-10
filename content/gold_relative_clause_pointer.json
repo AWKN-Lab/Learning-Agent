@@ -1,0 +1,46 @@
+{
+  "content_pack_version": "gold-v1",
+  "node_id": "relative_clause.pointer",
+  "outcome_contract": {
+    "repair_success": "学生在主任务纠正 pointer 后，3 道表层不同但底层关系相同的迁移题全部独立通过",
+    "pass_rule": "3/3 transfer variants pass",
+    "failure_type": "POINTER_ERROR"
+  },
+  "task": {
+    "id": "gold-pointer-001",
+    "sentence": "The ruins in which they were trapped were dangerous.",
+    "prompt": "which 指向前面的哪个词？",
+    "choices": ["ruins", "trapped", "dangerous"],
+    "expected": "ruins"
+  },
+  "hints": [
+    "问题出在 which 的指向，再找一次。",
+    "先找 which 前面的名词。",
+    "which 在这里回指一个先行词。",
+    "先行词是被后面从句补充说明的名词。",
+    "完整结构：which 回指 the ruins；in which = in the ruins。"
+  ],
+  "variants": [
+    {
+      "id": "pointer-v1",
+      "sentence": "The house in which we stayed was quiet.",
+      "prompt": "which 指向哪个词？",
+      "choices": ["house", "stayed", "quiet"],
+      "expected": "house"
+    },
+    {
+      "id": "pointer-v2",
+      "sentence": "The city in which she was born has changed greatly.",
+      "prompt": "which 指向哪个词？",
+      "choices": ["city", "born", "changed"],
+      "expected": "city"
+    },
+    {
+      "id": "pointer-v3",
+      "sentence": "The room in which the meeting was held is upstairs.",
+      "prompt": "which 指向哪个词？",
+      "choices": ["room", "meeting", "upstairs"],
+      "expected": "room"
+    }
+  ]
+}

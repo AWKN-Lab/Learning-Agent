@@ -1,0 +1,13 @@
+{
+  "content_pack_version": "gold-v1",
+  "node_id": "word.root.rupt",
+  "task": {
+    "id": "word-eruption-001",
+    "word": "eruption",
+    "parts": ["e", "rupt", "ion"],
+    "prompt": "哪个部分承载 break / burst 的核心意义？",
+    "choices": ["e", "rupt", "ion"],
+    "expected": "rupt"
+  },
+  "explanation": "rupt 表示 break / burst；-ion 把动作变成名词，eruption 可理解为向外爆发形成的事件。"
+}

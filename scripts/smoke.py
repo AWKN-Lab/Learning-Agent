@@ -1,0 +1,30 @@
+import os
+import tempfile
+
+_fd, _db = tempfile.mkstemp(prefix="learning-agent-smoke-", suffix=".db")
+os.close(_fd)
+os.environ["LEARNING_DB_PATH"] = _db
+
+from fastapi.testclient import TestClient  # noqa: E402
+from apps.api.app import app  # noqa: E402
+
+client = TestClient(app)
+start = client.post("/api/v1/session/start").json()
+sid = start["session"]["session_id"]
+
+steps = [
+    ("ANSWER_SUBMITTED", {"answer": "trapped"}),
+    ("ANSWER_SUBMITTED", {"answer": "ruins"}),
+    ("VERIFY_ANSWER", {"variant_id": "pointer-v1", "answer": "house"}),
+    ("VERIFY_ANSWER", {"variant_id": "pointer-v2", "answer": "city"}),
+    ("VERIFY_ANSWER", {"variant_id": "pointer-v3", "answer": "room"}),
+    ("WORD_ANSWER", {"answer": "rupt"}),
+]
+for event, payload in steps:
+    response = client.post("/api/v1/learning/step", json={"session_id": sid, "event": event, "payload": payload})
+    response.raise_for_status()
+    print(event, "->", response.json()["session"]["state"])
+
+snapshot = client.get(f"/api/v1/session/{sid}").json()
+assert snapshot["session"]["state"] == "DONE"
+print("CLOSED_LOOP", sid, "events=", len(snapshot["events"]))
