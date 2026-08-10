@@ -8,13 +8,34 @@ const model = {
   errorType: null,
   eventsCount: 0,
   loading: false,
+  sessionToken: null,
 }
 
 const esc = (value = '') => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]))
 
-function saveSessionId(id) { try { localStorage.setItem('learning-agent-session', id) } catch {} }
-function readSessionId() { try { return localStorage.getItem('learning-agent-session') } catch { return null } }
-function clearSessionId() { try { localStorage.removeItem('learning-agent-session') } catch {} }
+function saveSessionAuth(id, token) {
+  try {
+    localStorage.setItem(
+      'learning-agent-session',
+      JSON.stringify({id, token}),
+    )
+  } catch {}
+}
+
+function readSessionAuth() {
+  try {
+    const raw = localStorage.getItem('learning-agent-session')
+    if (!raw) return null
+    const value = JSON.parse(raw)
+    return value?.id && value?.token ? value : null
+  } catch {
+    return null
+  }
+}
+
+function clearSessionAuth() {
+  try { localStorage.removeItem('learning-agent-session') } catch {}
+}
 
 function newRequestId() {
   const token = globalThis.crypto?.randomUUID
@@ -40,8 +61,15 @@ function progress() {
 async function api(path, options = {}) {
   let response
   try {
+    const authHeaders = model.sessionToken
+      ? {'X-Session-Token': model.sessionToken}
+      : {}
     response = await fetch(path, {
-      headers: {'Content-Type':'application/json', ...(options.headers || {})},
+      headers: {
+        'Content-Type':'application/json',
+        ...authHeaders,
+        ...(options.headers || {}),
+      },
       ...options,
     })
   } catch (cause) {
@@ -69,12 +97,13 @@ async function submitCommand(body) {
 }
 
 function applyResult(data) {
+  if (data.session_token) model.sessionToken = data.session_token
   model.session = data.session
   model.task = data.current_task || null
   model.message = data.message || ''
   model.hint = data.hint || null
   model.errorType = data.error_type || null
-  saveSessionId(data.session.session_id)
+  saveSessionAuth(data.session.session_id, model.sessionToken)
 }
 
 async function refreshEventCount() {
@@ -98,16 +127,19 @@ async function start() {
 }
 
 async function restore() {
-  const sid = readSessionId()
-  if (!sid) return render()
+  const auth = readSessionAuth()
+  if (!auth) return render()
+  model.sessionToken = auth.token
   try {
-    const data = await api(`/api/v1/session/${sid}`)
+    const data = await api(`/api/v1/session/${auth.id}`)
     model.session = data.session
     model.task = data.current_task
     model.eventsCount = data.events.length
-    model.message = data.session.state === 'DONE' ? '上次学习闭环已完成。' : '已恢复上次学习现场。'
+    model.message = data.session.state === 'DONE'
+      ? '上次学习闭环已完成。'
+      : '已恢复上次学习现场。'
   } catch {
-    clearSessionId()
+    clearSessionAuth()
   }
   render()
 }
@@ -156,8 +188,8 @@ async function answer(choice) {
 }
 
 function reset() {
-  clearSessionId()
-  Object.assign(model, {session:null, task:null, message:'', hint:null, errorType:null, eventsCount:0, loading:false})
+  clearSessionAuth()
+  Object.assign(model, {session:null, task:null, message:'', hint:null, errorType:null, eventsCount:0, loading:false, sessionToken:null})
   render()
 }
 
