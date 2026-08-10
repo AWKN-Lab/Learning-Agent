@@ -130,6 +130,7 @@ class LearningController:
             "hint_level": 0,
             "variant_index": 0,
             "variant_passes": [],
+            "processed_event_ids": [],
             "node_status": "LEARNING",
             "word_status": "UNKNOWN",
             "agent_policy_version": "gold-loop-v1",
@@ -146,17 +147,41 @@ class LearningController:
             raise KeyError("session_not_found")
         return state
 
+    @staticmethod
+    def _event_allowed(state_name: str, event: str) -> bool:
+        return (
+            (state_name in {"TASK", "RETRY"} and event == "ANSWER_SUBMITTED")
+            or (state_name == "VERIFY" and event == "VERIFY_ANSWER")
+            or (state_name == "WORD_TASK" and event == "WORD_ANSWER")
+        )
+
+    @staticmethod
+    def _task_for_state(state: dict[str, Any]) -> dict[str, Any] | None:
+        if state["state"] in {"TASK", "RETRY"}:
+            return GOLD["task"]
+        if state["state"] == "VERIFY":
+            index = state["variant_index"]
+            return GOLD["variants"][index] if index < len(GOLD["variants"]) else None
+        if state["state"] == "WORD_TASK":
+            return WORD["task"]
+        return None
+
     def step(self, session_id: str, event: str, payload: dict[str, Any], event_id: str | None = None) -> StepResult:
         state = self._load(session_id)
+        if event_id and event_id in state.get("processed_event_ids", []):
+            return StepResult(state, "NOOP", "重复事件已忽略。", current_task=self._task_for_state(state))
+        if not self._event_allowed(state["state"], event):
+            raise ValueError(f"invalid_transition:{state['state']}:{event}")
+
+        if event_id:
+            state.setdefault("processed_event_ids", []).append(event_id)
         self.store.append_event(session_id, event.lower(), payload, event_id=event_id)
 
-        if event == "ANSWER_SUBMITTED" and state["state"] in {"TASK", "RETRY"}:
+        if event == "ANSWER_SUBMITTED":
             return self._answer_main(state, payload)
-        if event == "VERIFY_ANSWER" and state["state"] == "VERIFY":
+        if event == "VERIFY_ANSWER":
             return self._answer_variant(state, payload)
-        if event == "WORD_ANSWER" and state["state"] == "WORD_TASK":
-            return self._answer_word(state, payload)
-        raise ValueError(f"invalid_transition:{state['state']}:{event}")
+        return self._answer_word(state, payload)
 
     def _answer_main(self, state: dict[str, Any], payload: dict[str, Any]) -> StepResult:
         answer = str(payload.get("answer", "")).strip().lower()
@@ -166,21 +191,12 @@ class LearningController:
             state["state"] = "VERIFY"
             self.store.append_event(state["session_id"], "main_task_passed", {"attempt": state["attempt"]})
             self.store.save_session(state)
-            return StepResult(
-                state,
-                "SHOW_VARIANT",
-                "主任务已修正。现在换三道表面不同的新题验证。",
-                current_task=GOLD["variants"][0],
-            )
+            return StepResult(state, "SHOW_VARIANT", "主任务已修正。现在换三道表面不同的新题验证。", current_task=GOLD["variants"][0])
 
         state["state"] = "RETRY"
         state["hint_level"] = min(state["hint_level"] + 1, len(GOLD["hints"]))
         hint = GOLD["hints"][state["hint_level"] - 1]
-        self.store.append_event(
-            state["session_id"],
-            "error_diagnosed",
-            {"root_cause": "POINTER_ERROR", "evidence": {"expected": expected, "actual": answer}},
-        )
+        self.store.append_event(state["session_id"], "error_diagnosed", {"root_cause": "POINTER_ERROR", "evidence": {"expected": expected, "actual": answer}})
         self.store.append_event(state["session_id"], "hint_given", {"level": state["hint_level"], "hint": hint})
         self.store.save_session(state)
         return StepResult(state, "RETRY_TASK", "定位到指向关系错误。", error_type="POINTER_ERROR", hint=hint, current_task=GOLD["task"])
@@ -212,13 +228,7 @@ class LearningController:
         self.store.append_event(state["session_id"], "learning_state_updated", {"node_id": GOLD["node_id"], "from": old, "to": "VERIFIED"})
         self.store.append_event(state["session_id"], "next_task_selected", {"task_id": WORD["task"]["id"], "reason_code": "SECOND_CAPABILITY"})
         self.store.save_session(state)
-        return StepResult(
-            state,
-            "SHOW_WORD_TASK",
-            "pointer 已通过 3/3 迁移验证。进入第二种能力：词根逻辑拆解。",
-            current_task=WORD["task"],
-            topology_delta={"node_id": GOLD["node_id"], "from": old, "to": "VERIFIED"},
-        )
+        return StepResult(state, "SHOW_WORD_TASK", "pointer 已通过 3/3 迁移验证。进入第二种能力：词根逻辑拆解。", current_task=WORD["task"], topology_delta={"node_id": GOLD["node_id"], "from": old, "to": "VERIFIED"})
 
     def _answer_word(self, state: dict[str, Any], payload: dict[str, Any]) -> StepResult:
         answer = str(payload.get("answer", "")).strip().lower()
@@ -230,14 +240,4 @@ class LearningController:
         self.store.append_event(state["session_id"], "word_verified", {"node_id": WORD["node_id"], "result": "VERIFIED"})
         self.store.append_event(state["session_id"], "demo_completed", {"result": "CLOSED_LOOP"})
         self.store.save_session(state)
-        return StepResult(
-            state,
-            "SHOW_RESULT",
-            WORD["explanation"],
-            topology_delta={
-                "nodes": [
-                    {"node_id": GOLD["node_id"], "status": state["node_status"]},
-                    {"node_id": WORD["node_id"], "status": state["word_status"]},
-                ]
-            },
-        )
+        return StepResult(state, "SHOW_RESULT", WORD["explanation"], topology_delta={"nodes": [{"node_id": GOLD["node_id"], "status": state["node_status"]}, {"node_id": WORD["node_id"], "status": state["word_status"]}]})

@@ -38,9 +38,8 @@ def test_complete_demo_closed_loop():
         response = step(sid, "VERIFY_ANSWER", {"variant_id": variant_id, "answer": answer})
         assert response.status_code == 200
 
-    after_transfer = response.json()
-    assert after_transfer["session"]["node_status"] == "VERIFIED"
-    assert after_transfer["session"]["state"] == "WORD_TASK"
+    assert response.json()["session"]["node_status"] == "VERIFIED"
+    assert response.json()["session"]["state"] == "WORD_TASK"
 
     word = step(sid, "WORD_ANSWER", {"answer": "rupt"})
     assert word.status_code == 200
@@ -54,18 +53,27 @@ def test_complete_demo_closed_loop():
     assert "demo_completed" in events
 
 
-def test_invalid_transition_is_rejected():
+def test_invalid_transition_is_rejected_without_writing_event():
     sid = client.post("/api/v1/session/start").json()["session"]["session_id"]
-    response = step(sid, "VERIFY_ANSWER", {"variant_id": "pointer-v1", "answer": "house"})
+    before = client.get(f"/api/v1/session/{sid}").json()["events"]
+    response = step(sid, "VERIFY_ANSWER", {"variant_id": "pointer-v1", "answer": "house"}, event_id="bad-transition")
     assert response.status_code == 409
+    after = client.get(f"/api/v1/session/{sid}").json()["events"]
+    assert len(after) == len(before)
 
 
-def test_event_id_is_idempotent_in_event_store():
+def test_duplicate_request_is_controller_idempotent():
     sid = client.post("/api/v1/session/start").json()["session"]["session_id"]
     event_id = "fixed-event-id"
     first = step(sid, "ANSWER_SUBMITTED", {"answer": "trapped"}, event_id=event_id)
     assert first.status_code == 200
-    # Reusing an event_id must not duplicate the raw event row. Controller state changes are protected by state/event guards in real clients.
+    first_state = first.json()["session"]
+    second = step(sid, "ANSWER_SUBMITTED", {"answer": "trapped"}, event_id=event_id)
+    assert second.status_code == 200
+    second_state = second.json()["session"]
+    assert second.json()["ui_action"] == "NOOP"
+    assert second_state["attempt"] == first_state["attempt"]
+    assert second_state["hint_level"] == first_state["hint_level"]
     snapshot = client.get(f"/api/v1/session/{sid}").json()
     matching = [e for e in snapshot["events"] if e["event_id"] == event_id]
     assert len(matching) == 1
