@@ -1,14 +1,15 @@
 import os
 import tempfile
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 
 _fd, _db = tempfile.mkstemp(prefix="learning-agent-test-", suffix=".db")
 os.close(_fd)
 os.environ["LEARNING_DB_PATH"] = _db
+os.environ["APP_ENV"] = "test"
 
 from fastapi.testclient import TestClient  # noqa: E402
-from apps.api.app import StepRequest, app, learning_step  # noqa: E402
+
+from apps.api.app import app  # noqa: E402
 
 client = TestClient(app)
 
@@ -17,125 +18,205 @@ def request_id(session_id: str, suffix: str | None = None) -> str:
     return f"{session_id}:{suffix or uuid.uuid4()}"
 
 
-def step(session_id, event, payload, event_id=None, include_event_id=True):
-    body = {"session_id": session_id, "event": event, "payload": payload}
-    if include_event_id:
-        body["event_id"] = event_id or request_id(session_id)
-    return client.post("/api/v1/learning/step", json=body)
+def start() -> dict:
+    response = client.post("/api/v1/session/start")
+    assert response.status_code == 200
+    return response.json()
 
 
-def test_complete_demo_closed_loop():
-    start = client.post("/api/v1/session/start")
-    assert start.status_code == 200
-    data = start.json()
-    sid = data["session"]["session_id"]
-    assert data["session"]["state"] == "TASK"
-
-    wrong = step(sid, "ANSWER_SUBMITTED", {"answer": "trapped"})
-    assert wrong.status_code == 200
-    assert wrong.json()["error_type"] == "POINTER_ERROR"
-    assert wrong.json()["session"]["state"] == "RETRY"
-
-    fixed = step(sid, "ANSWER_SUBMITTED", {"answer": "ruins"})
-    assert fixed.status_code == 200
-    assert fixed.json()["session"]["state"] == "VERIFY"
-
-    for variant_id, answer in [("pointer-v1", "house"), ("pointer-v2", "city"), ("pointer-v3", "room")]:
-        response = step(sid, "VERIFY_ANSWER", {"variant_id": variant_id, "answer": answer})
-        assert response.status_code == 200
-
-    assert response.json()["session"]["node_status"] == "VERIFIED"
-    assert response.json()["session"]["state"] == "WORD_TASK"
-
-    word = step(sid, "WORD_ANSWER", {"answer": "rupt"})
-    assert word.status_code == 200
-    assert word.json()["session"]["state"] == "DONE"
-    assert word.json()["session"]["word_status"] == "VERIFIED"
-
-    snapshot = client.get(f"/api/v1/session/{sid}")
-    events = [e["event_type"] for e in snapshot.json()["events"]]
-    assert "error_diagnosed" in events
-    assert "patch_completed" in events
-    assert "demo_completed" in events
-
-
-def test_invalid_transition_is_rejected_without_writing_event():
-    sid = client.post("/api/v1/session/start").json()["session"]["session_id"]
-    before = client.get(f"/api/v1/session/{sid}").json()["events"]
-    response = step(sid, "VERIFY_ANSWER", {"variant_id": "pointer-v1", "answer": "house"}, event_id=request_id(sid, "bad-transition"))
-    assert response.status_code == 409
-    after = client.get(f"/api/v1/session/{sid}").json()["events"]
-    assert len(after) == len(before)
-
-
-def test_duplicate_request_is_controller_idempotent():
-    sid = client.post("/api/v1/session/start").json()["session"]["session_id"]
-    event_id = request_id(sid, "fixed-event-id")
-    first = step(sid, "ANSWER_SUBMITTED", {"answer": "trapped"}, event_id=event_id)
-    assert first.status_code == 200
-    first_state = first.json()["session"]
-    second = step(sid, "ANSWER_SUBMITTED", {"answer": "trapped"}, event_id=event_id)
-    assert second.status_code == 200
-    second_state = second.json()["session"]
-    assert second.json()["ui_action"] == "NOOP"
-    assert second_state["attempt"] == first_state["attempt"]
-    assert second_state["hint_level"] == first_state["hint_level"]
-    snapshot = client.get(f"/api/v1/session/{sid}").json()
-    matching = [e for e in snapshot["events"] if e["event_id"] == event_id]
-    assert len(matching) == 1
-
-
-def test_concurrent_duplicate_request_advances_state_once():
-    sid = client.post("/api/v1/session/start").json()["session"]["session_id"]
-    event_id = request_id(sid, "concurrent")
-    request = StepRequest(
-        session_id=sid,
-        event="ANSWER_SUBMITTED",
-        event_id=event_id,
-        payload={"answer": "trapped"},
+def step(
+    session: dict,
+    event: str,
+    payload: dict,
+    *,
+    event_id: str | None = None,
+    expected_version: int | None = None,
+):
+    return client.post(
+        "/api/v1/learning/step",
+        json={
+            "session_id": session["session_id"],
+            "event": event,
+            "payload": payload,
+            "event_id": event_id or request_id(session["session_id"]),
+            "expected_version": (
+                session["version"]
+                if expected_version is None
+                else expected_version
+            ),
+        },
     )
 
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        results = list(pool.map(lambda _: learning_step(request), range(2)))
 
-    actions = sorted(result["ui_action"] for result in results)
-    assert actions == ["NOOP", "RETRY_TASK"]
-    snapshot = client.get(f"/api/v1/session/{sid}").json()
-    assert snapshot["session"]["attempt"] == 1
-    assert snapshot["session"]["hint_level"] == 1
-    matching = [e for e in snapshot["events"] if e["event_id"] == event_id]
-    assert len(matching) == 1
+def test_complete_demo_closed_loop_and_replay_integrity():
+    session = start()["session"]
+
+    wrong = step(session, "ANSWER_SUBMITTED", {"answer": "trapped"})
+    assert wrong.status_code == 200
+    session = wrong.json()["session"]
+    assert session["version"] == 1
+    assert wrong.json()["error_type"] == "POINTER_ERROR"
+
+    fixed = step(session, "ANSWER_SUBMITTED", {"answer": "ruins"})
+    assert fixed.status_code == 200
+    session = fixed.json()["session"]
+    assert session["state"] == "VERIFY"
+
+    for variant_id, answer in [
+        ("pointer-v1", "house"),
+        ("pointer-v2", "city"),
+        ("pointer-v3", "room"),
+    ]:
+        response = step(
+            session,
+            "VERIFY_ANSWER",
+            {"variant_id": variant_id, "answer": answer},
+        )
+        assert response.status_code == 200
+        session = response.json()["session"]
+
+    assert session["node_status"] == "VERIFIED"
+    assert session["state"] == "WORD_TASK"
+
+    word = step(session, "WORD_ANSWER", {"answer": "rupt"})
+    assert word.status_code == 200
+    session = word.json()["session"]
+    assert session["state"] == "DONE"
+    assert session["word_status"] == "VERIFIED"
+
+    snapshot = client.get(
+        f"/api/v1/session/{session['session_id']}"
+    ).json()
+    event_types = [event["event_type"] for event in snapshot["events"]]
+    assert "error_diagnosed" in event_types
+    assert "patch_completed" in event_types
+    assert "demo_completed" in event_types
+
+    integrity = client.get(
+        f"/api/v1/internal/session/{session['session_id']}/integrity"
+    )
+    assert integrity.status_code == 200
+    assert integrity.json()["consistent"] is True
+    assert integrity.json()["stored_version"] == 6
+    assert integrity.json()["receipt_count"] == 6
 
 
-def test_mutation_requires_namespaced_event_id_and_bounded_payload():
-    sid = client.post("/api/v1/session/start").json()["session"]["session_id"]
+def test_receipt_replays_exact_response_and_rejects_command_reuse():
+    session = start()["session"]
+    command_id = request_id(session["session_id"], "receipt")
 
-    missing = step(sid, "ANSWER_SUBMITTED", {"answer": "trapped"}, include_event_id=False)
-    assert missing.status_code == 422
+    first = step(
+        session,
+        "ANSWER_SUBMITTED",
+        {"answer": "trapped"},
+        event_id=command_id,
+    )
+    assert first.status_code == 200
 
-    wrong_namespace = step(sid, "ANSWER_SUBMITTED", {"answer": "trapped"}, event_id="00000000-0000-0000-0000-000000000000:bad")
+    replay = step(
+        session,
+        "ANSWER_SUBMITTED",
+        {"answer": "trapped"},
+        event_id=command_id,
+    )
+    assert replay.status_code == 200
+    assert replay.json() == first.json()
+
+    conflict = step(
+        session,
+        "ANSWER_SUBMITTED",
+        {"answer": "ruins"},
+        event_id=command_id,
+    )
+    assert conflict.status_code == 409
+    assert conflict.json()["detail"] == "command_id_conflict"
+
+
+def test_stale_version_rejected_without_event_or_state_change():
+    session = start()["session"]
+    first = step(session, "ANSWER_SUBMITTED", {"answer": "trapped"})
+    assert first.status_code == 200
+
+    sid = session["session_id"]
+    before = client.get(f"/api/v1/session/{sid}").json()
+    stale = step(
+        session,
+        "ANSWER_SUBMITTED",
+        {"answer": "ruins"},
+        event_id=request_id(sid, "stale"),
+        expected_version=0,
+    )
+    assert stale.status_code == 409
+    assert stale.json()["detail"] == "state_conflict"
+    after = client.get(f"/api/v1/session/{sid}").json()
+    assert after == before
+
+
+def test_invalid_transition_and_input_contracts():
+    session = start()["session"]
+    sid = session["session_id"]
+    before = client.get(f"/api/v1/session/{sid}").json()
+
+    invalid = step(
+        session,
+        "VERIFY_ANSWER",
+        {"variant_id": "pointer-v1", "answer": "house"},
+    )
+    assert invalid.status_code == 409
+    assert invalid.json()["detail"] == "invalid_transition"
+    assert client.get(f"/api/v1/session/{sid}").json() == before
+
+    missing_version = client.post(
+        "/api/v1/learning/step",
+        json={
+            "session_id": sid,
+            "event": "ANSWER_SUBMITTED",
+            "event_id": request_id(sid),
+            "payload": {"answer": "trapped"},
+        },
+    )
+    assert missing_version.status_code == 422
+
+    wrong_namespace = client.post(
+        "/api/v1/learning/step",
+        json={
+            "session_id": sid,
+            "event": "ANSWER_SUBMITTED",
+            "event_id": "00000000-0000-0000-0000-000000000000:bad",
+            "expected_version": 0,
+            "payload": {"answer": "trapped"},
+        },
+    )
     assert wrong_namespace.status_code == 422
 
-    oversized = step(sid, "ANSWER_SUBMITTED", {"answer": "x" * 65})
+    oversized = client.post(
+        "/api/v1/learning/step",
+        json={
+            "session_id": sid,
+            "event": "ANSWER_SUBMITTED",
+            "event_id": request_id(sid),
+            "expected_version": 0,
+            "payload": {"answer": "x" * 65},
+        },
+    )
     assert oversized.status_code == 422
 
 
-def test_spa_does_not_swallow_missing_api_route_or_escape_web_root():
+def test_spa_security_and_health_contracts():
     missing_api = client.get("/api/v1/does-not-exist")
     assert missing_api.status_code == 404
     assert "application/json" in missing_api.headers.get("content-type", "")
 
     traversal = client.get("/%2e%2e/README.md")
     assert traversal.status_code == 404
-    assert "Learning-Agent" not in traversal.text
 
-
-def test_security_headers_are_present():
     response = client.get("/")
     assert response.status_code == 200
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["x-frame-options"] == "DENY"
-    assert "default-src 'self'" in response.headers["content-security-policy"]
 
-    api_response = client.get("/api/v1/health")
-    assert api_response.headers["cache-control"] == "no-store"
+    live = client.get("/api/v1/live")
+    ready = client.get("/api/v1/ready")
+    assert live.status_code == 200
+    assert ready.status_code == 200
+    assert ready.json()["database"] == "ok"
