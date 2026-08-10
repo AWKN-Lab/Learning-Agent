@@ -24,6 +24,7 @@ jobs:
       - run: pytest -q
       - run: python scripts/smoke.py
       - run: python scripts/check_static.py
+      - run: python scripts/cleanup_sessions.py --dry-run --max-sessions 100
       - run: node --check apps/web/app.js
 
   docker:
@@ -45,12 +46,16 @@ jobs:
           trap 'docker logs learning-agent-ci || true; docker rm -f learning-agent-ci >/dev/null 2>&1 || true' EXIT
           ready=0
           for i in $(seq 1 20); do
-            if curl -fsS http://127.0.0.1:18000/api/v1/health >/tmp/health.json; then
+            if curl -fsS http://127.0.0.1:18000/api/v1/ready >/tmp/ready.json; then
               ready=1
               break
             fi
             sleep 1
           done
           test "$ready" = "1"
-          grep -q '"status":"ok"' /tmp/health.json
+          grep -q '"status":"ok"' /tmp/ready.json
+          curl -fsS http://127.0.0.1:18000/api/v1/live | grep -q '"status":"ok"'
           curl -fsS http://127.0.0.1:18000/ | grep -q '文科实验室'
+          curl -fsS -X POST http://127.0.0.1:18000/api/v1/session/start >/tmp/session.json
+          grep -q '"session_token"' /tmp/session.json
+          docker exec learning-agent-ci python scripts/cleanup_sessions.py --dry-run --max-sessions 100 | grep -q '"dry_run": true'
