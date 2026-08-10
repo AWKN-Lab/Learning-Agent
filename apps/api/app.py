@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from .core import LearningController, Store
+from .core import GOLD, WORD, LearningController, Store
 
 app = FastAPI(title="Learning-Agent Demo", version="0.1.0-demo")
 app.add_middleware(
@@ -31,6 +31,17 @@ class StepRequest(BaseModel):
     event_id: str | None = None
 
 
+def current_task(state: dict[str, Any]) -> dict[str, Any] | None:
+    if state["state"] in {"TASK", "RETRY"}:
+        return GOLD["task"]
+    if state["state"] == "VERIFY":
+        index = state["variant_index"]
+        return GOLD["variants"][index] if index < len(GOLD["variants"]) else None
+    if state["state"] == "WORD_TASK":
+        return WORD["task"]
+    return None
+
+
 @app.get("/api/v1/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "mode": os.getenv("LEARNING_MODE", "deterministic")}
@@ -46,7 +57,7 @@ def get_session(session_id: str) -> dict[str, Any]:
     state = store.get_session(session_id)
     if not state:
         raise HTTPException(status_code=404, detail="session_not_found")
-    return {"session": state, "events": store.events(session_id)}
+    return {"session": state, "current_task": current_task(state), "events": store.events(session_id)}
 
 
 @app.post("/api/v1/learning/step")
