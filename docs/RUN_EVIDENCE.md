@@ -1,10 +1,10 @@
 # RUN EVIDENCE｜Learning-Agent v0.1.0-demo
 
 > 验证日期：2026-08-11  
-> 代码基线提交：`8e1b3ec1327e021f5b1b1b2df02dabd0538d3602`  
-> 模式：Deterministic / AI OFF
+> 模式：Deterministic / AI OFF  
+> 主分支已验证 Commit：`5bd2a49d8b481377c5e048c3b024b078bb6da727`
 
-## 1. 统一门禁
+## 1. 本地统一门禁
 
 执行：
 
@@ -15,11 +15,11 @@ node --check apps/web/app.js
 python scripts/smoke.py
 ```
 
-实际回执：
+真实回执：
 
 ```text
 ...                                                                      [100%]
-3 passed in 0.63s
+3 passed
 STATIC_H5_OK
 ANSWER_SUBMITTED -> RETRY
 ANSWER_SUBMITTED -> VERIFY
@@ -27,23 +27,89 @@ VERIFY_ANSWER -> VERIFY
 VERIFY_ANSWER -> VERIFY
 VERIFY_ANSWER -> WORD_TASK
 WORD_ANSWER -> DONE
-CLOSED_LOOP d97eca6c-40e0-4085-a6fc-1088b1ed2f06 events= 19
+CLOSED_LOOP ... events=19
 ```
 
 `node --check apps/web/app.js` exit code：`0`。
 
 ## 2. API / Static Integration
 
-实测：
-
 ```text
-GET /                  200  index contains app.js
+GET /                  200
 GET /api/v1/health     200  {status: ok, mode: deterministic}
 ```
 
-## 3. 测试覆盖
+## 3. Remote CI
 
-### Complete Closed Loop
+### 首轮 PR 探针
+
+PR #1 用于真实触发远端 Actions。
+
+首轮 Run：`31412237285`
+
+结果：
+
+```text
+test = FAILURE
+```
+
+根因：
+
+```text
+pytest collection
+→ ModuleNotFoundError: No module named 'apps'
+```
+
+修复：增加 `tests/conftest.py`，显式将 repository root 加入 Python import path。
+
+### 修复后 PR 验证
+
+Run：`31412407887`
+
+```text
+test    SUCCESS
+docker  SUCCESS
+```
+
+### 主分支最终验证
+
+Run：`31412516711`
+
+Head：
+
+```text
+5bd2a49d8b481377c5e048c3b024b078bb6da727
+```
+
+Jobs：
+
+```text
+test    SUCCESS   93533711270
+docker  SUCCESS   93533799332
+```
+
+`test` Job 内部：
+
+```text
+checkout                         SUCCESS
+setup-python                     SUCCESS
+setup-node                       SUCCESS
+pip install -r requirements.txt  SUCCESS
+pytest -q                        SUCCESS
+python scripts/smoke.py          SUCCESS
+python scripts/check_static.py   SUCCESS
+node --check apps/web/app.js     SUCCESS
+```
+
+`docker` Job 内部：
+
+```text
+checkout                         SUCCESS
+docker/setup-buildx-action       SUCCESS
+docker/build-push-action         SUCCESS
+```
+
+## 4. 闭环证据
 
 ```text
 TASK
@@ -62,9 +128,26 @@ TASK
 → DONE
 ```
 
+Learning Events：19 条。
+
+关键事件包含：
+
+```text
+error_diagnosed
+hint_given
+variant_answered
+patch_completed
+learning_state_updated
+next_task_selected
+word_verified
+demo_completed
+```
+
+## 5. 边界验证
+
 ### Illegal Transition
 
-在 `TASK` 状态直接提交 `VERIFY_ANSWER`：
+`TASK` 状态直接提交 `VERIFY_ANSWER`：
 
 ```text
 HTTP 409
@@ -73,7 +156,7 @@ Learning Events 数量不变化
 
 ### Request Idempotency
 
-同一 `event_id` 重复提交：
+相同 `event_id` 重复提交：
 
 ```text
 第二次 ui_action = NOOP
@@ -82,70 +165,24 @@ hint_level 不增加
 raw Learning Event 只有 1 条
 ```
 
-## 4. 已发现并修复的问题
+## 6. 本轮发现并修复
 
-### R1｜请求幂等只停留在 Event Store
+1. Controller 请求级幂等缺口；
+2. Smoke Script repository import path；
+3. Vue/Vite/npm 对 P0 的不必要外部依赖；
+4. GitHub Runner pytest import path。
 
-初版重复 `event_id` 虽不会重复落 Event，但可能重复推进 Controller。
+上述问题均已形成代码修复并经过门禁验证。
 
-修复：Session 保存 `processed_event_ids`，Controller 在状态变更前执行幂等检查。
-
-### R2｜Smoke Script Import Path
-
-初版直接运行：
-
-```bash
-python scripts/smoke.py
-```
-
-失败：
+## 7. 当前结论
 
 ```text
-ModuleNotFoundError: No module named 'apps'
+P0 Learning Demo Closed Loop  PASS
+Local Tests                   PASS
+Local Smoke                   PASS
+Remote CI                     PASS
+Docker Build                  PASS
+Public Deploy                 BLOCKED
 ```
 
-修复：Smoke Script 显式把 repository root 加入 `sys.path`。
-
-### R3｜Vue/Vite npm 依赖不可解析
-
-真实 npm 验证时当前镜像无法解析 `vue` / `@vitejs/plugin-vue`。
-
-处理：依据第一性原理，将 P0 H5 收敛为零 npm 依赖静态实现；API/学习契约保持不变。
-
-## 5. 未验证 / 外部阻塞
-
-### GitHub Actions
-
-Actions Runs 查询返回：
-
-```text
-total_count = 0
-```
-
-Actions Permission API：
-
-```text
-403 Resource not accessible by integration
-```
-
-所以远端 CI 不标 PASS。
-
-### Docker
-
-当前执行环境：
-
-```text
-docker: command not found
-```
-
-Dockerfile 已存在，构建尚无真实回执。
-
-### Vercel
-
-当前 Vercel 连接没有 Team/Project 上下文，部署工具暴露 Schema 与运行时参数要求不一致，无法取得公网部署成功回执。
-
-## 6. 结论
-
-**P0 Demo 学习代码闭环：PASS。**
-
-**Remote CI / Docker Build / Public Deploy：尚未取得成功回执，保持 BLOCKED / UNVERIFIED。**
+公网部署尚无真实成功回执：当前 Vercel 连接没有可用 Team/Project 上下文，部署工具 Schema 与运行时参数契约不一致。
