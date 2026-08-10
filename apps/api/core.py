@@ -12,6 +12,7 @@ from .domain import (
     Transition,
     WORD,
 )
+from .runtime_errors import RateLimitExceeded, SessionExpired, SessionUnauthorized
 from .store import Store
 
 __all__ = [
@@ -20,7 +21,10 @@ __all__ = [
     "GOLD",
     "InvalidTransition",
     "LearningController",
+    "RateLimitExceeded",
+    "SessionExpired",
     "SessionNotFound",
+    "SessionUnauthorized",
     "StateConflict",
     "StepResult",
     "Store",
