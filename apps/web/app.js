@@ -12,17 +12,9 @@ const model = {
 
 const esc = (value = '') => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]))
 
-function saveSessionId(id) {
-  try { localStorage.setItem('learning-agent-session', id) } catch {}
-}
-
-function readSessionId() {
-  try { return localStorage.getItem('learning-agent-session') } catch { return null }
-}
-
-function clearSessionId() {
-  try { localStorage.removeItem('learning-agent-session') } catch {}
-}
+function saveSessionId(id) { try { localStorage.setItem('learning-agent-session', id) } catch {} }
+function readSessionId() { try { return localStorage.getItem('learning-agent-session') } catch { return null } }
+function clearSessionId() { try { localStorage.removeItem('learning-agent-session') } catch {} }
 
 function newRequestId() {
   const token = globalThis.crypto?.randomUUID
@@ -46,12 +38,34 @@ function progress() {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
-    headers: {'Content-Type':'application/json', ...(options.headers || {})},
-    ...options,
-  })
-  if (!response.ok) throw new Error(await response.text())
+  let response
+  try {
+    response = await fetch(path, {
+      headers: {'Content-Type':'application/json', ...(options.headers || {})},
+      ...options,
+    })
+  } catch (cause) {
+    const error = new Error('network_error')
+    error.network = true
+    error.cause = cause
+    throw error
+  }
+  if (!response.ok) {
+    const error = new Error(await response.text())
+    error.status = response.status
+    throw error
+  }
   return response.json()
+}
+
+async function submitCommand(body) {
+  const options = {method:'POST', body:JSON.stringify(body)}
+  try {
+    return await api('/api/v1/learning/step', options)
+  } catch (error) {
+    if (error.network) return api('/api/v1/learning/step', options)
+    throw error
+  }
 }
 
 function applyResult(data) {
@@ -111,19 +125,30 @@ async function answer(choice) {
     } else if (model.session.state === 'WORD_TASK') {
       event = 'WORD_ANSWER'
     }
-    const data = await api('/api/v1/learning/step', {
-      method:'POST',
-      body:JSON.stringify({
-        session_id:model.session.session_id,
-        event,
-        event_id:newRequestId(),
-        payload,
-      }),
-    })
-    applyResult(data)
+
+    const command = {
+      session_id: model.session.session_id,
+      event,
+      event_id: newRequestId(),
+      expected_version: model.session.version,
+      payload,
+    }
+    applyResult(await submitCommand(command))
     await refreshEventCount()
   } catch (error) {
-    model.message = `请求失败：${error.message}`
+    if (error.status === 409) {
+      try {
+        const snapshot = await api(`/api/v1/session/${model.session.session_id}`)
+        model.session = snapshot.session
+        model.task = snapshot.current_task
+        model.eventsCount = snapshot.events.length
+        model.message = '学习状态已更新，请按当前任务继续。'
+      } catch {
+        model.message = `状态恢复失败：${error.message}`
+      }
+    } else {
+      model.message = `请求失败：${error.message}`
+    }
   } finally {
     model.loading = false
     render()
@@ -160,7 +185,7 @@ function render() {
     <section class="progress-card">
       <div class="progress-copy"><span>闭环进度</span><strong>${progress()}%</strong></div>
       <div class="track"><div class="bar" style="width:${progress()}%"></div></div>
-      ${model.session?`<div class="facts"><span>pointer: ${esc(model.session.node_status)}</span><span>rupt: ${esc(model.session.word_status)}</span><span>events: ${model.eventsCount}</span></div>`:''}
+      ${model.session?`<div class="facts"><span>pointer: ${esc(model.session.node_status)}</span><span>rupt: ${esc(model.session.word_status)}</span><span>v${esc(model.session.version)}</span><span>events: ${model.eventsCount}</span></div>`:''}
     </section>
     ${!model.session?`<section class="lab-card intro"><div class="icon">∴</div><h2>先证明学习真的发生</h2><p>首个 Gold Node：<code>relative_clause.pointer</code>。AI OFF 也能完整运行。</p><button id="start" class="primary" ${model.loading?'disabled':''}>开始 Gold Demo</button></section>`:
       model.session.state==='DONE'?`<section class="lab-card result"><div class="success-mark">✓</div><p class="eyebrow">CLOSED LOOP</p><h2>DEMO 闭环完成</h2><p>${esc(model.message)}</p><div class="result-grid"><div><small>relative_clause.pointer</small><strong>${esc(model.session.node_status)}</strong></div><div><small>word.root.rupt</small><strong>${esc(model.session.word_status)}</strong></div></div><p class="evidence">Learning Events 已记录：错误归因、提示、迁移验证、状态更新与完成事件。</p><button id="reset" class="secondary">重新演示</button></section>`:taskCard()}
