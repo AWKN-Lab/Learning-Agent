@@ -1,6 +1,7 @@
 import os
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +30,12 @@ steps = [
 for event, payload in steps:
     response = client.post(
         "/api/v1/learning/step",
-        json={"session_id": sid, "event": event, "payload": payload},
+        json={
+            "session_id": sid,
+            "event": event,
+            "event_id": f"{sid}:{uuid.uuid4()}",
+            "payload": payload,
+        },
     )
     response.raise_for_status()
     print(event, "->", response.json()["session"]["state"])

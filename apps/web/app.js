@@ -12,6 +12,25 @@ const model = {
 
 const esc = (value = '') => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]))
 
+function saveSessionId(id) {
+  try { localStorage.setItem('learning-agent-session', id) } catch {}
+}
+
+function readSessionId() {
+  try { return localStorage.getItem('learning-agent-session') } catch { return null }
+}
+
+function clearSessionId() {
+  try { localStorage.removeItem('learning-agent-session') } catch {}
+}
+
+function newRequestId() {
+  const token = globalThis.crypto?.randomUUID
+    ? globalThis.crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+  return `${model.session.session_id}:${token}`
+}
+
 function stageLabel() {
   if (!model.session) return '未开始'
   return ({TASK:'主任务', RETRY:'逻辑修复', VERIFY:'迁移验证', WORD_TASK:'能力迁移', DONE:'闭环完成'})[model.session.state] || model.session.state
@@ -41,7 +60,7 @@ function applyResult(data) {
   model.message = data.message || ''
   model.hint = data.hint || null
   model.errorType = data.error_type || null
-  localStorage.setItem('learning-agent-session', data.session.session_id)
+  saveSessionId(data.session.session_id)
 }
 
 async function refreshEventCount() {
@@ -56,6 +75,8 @@ async function start() {
   try {
     applyResult(await api('/api/v1/session/start', {method:'POST'}))
     model.eventsCount = 2
+  } catch (error) {
+    model.message = `启动失败：${error.message}`
   } finally {
     model.loading = false
     render()
@@ -63,7 +84,7 @@ async function start() {
 }
 
 async function restore() {
-  const sid = localStorage.getItem('learning-agent-session')
+  const sid = readSessionId()
   if (!sid) return render()
   try {
     const data = await api(`/api/v1/session/${sid}`)
@@ -72,7 +93,7 @@ async function restore() {
     model.eventsCount = data.events.length
     model.message = data.session.state === 'DONE' ? '上次学习闭环已完成。' : '已恢复上次学习现场。'
   } catch {
-    localStorage.removeItem('learning-agent-session')
+    clearSessionId()
   }
   render()
 }
@@ -95,7 +116,7 @@ async function answer(choice) {
       body:JSON.stringify({
         session_id:model.session.session_id,
         event,
-        event_id:crypto.randomUUID(),
+        event_id:newRequestId(),
         payload,
       }),
     })
@@ -110,7 +131,7 @@ async function answer(choice) {
 }
 
 function reset() {
-  localStorage.removeItem('learning-agent-session')
+  clearSessionId()
   Object.assign(model, {session:null, task:null, message:'', hint:null, errorType:null, eventsCount:0, loading:false})
   render()
 }
