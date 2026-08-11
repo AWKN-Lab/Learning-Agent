@@ -1,3 +1,4 @@
+/* 文科实验室 · 学习闭环：观察 → 诊断 → 修复 → 验证 · CLOSED LOOP */
 const app = document.querySelector('#app')
 
 const model = {
@@ -335,7 +336,7 @@ function homePage() {
           <span><i>1</i>做一道题</span><span><i>2</i>定位错因</span><span><i>3</i>针对修复</span><span><i>4</i>三题验证</span>
         </div>
       </div>
-      <div class="hero-art reveal" data-d="1"><img src="assets/hero.png" alt="学生正在学习语法，周围是知识节点图谱" /></div>
+      <div class="hero-art reveal" data-d="1"><img src="assets/hero-synthesis.jpg" alt="学生正在学习语法，周围是知识节点图谱" /></div>
     </section>
 
     <section class="hero-task reveal" data-d="1">
@@ -456,7 +457,7 @@ function assetsPage() {
       ${(model.manifest?.assets || []).map(item => `<article class="asset-card"><div><h3>${esc(item.name)}</h3>${statusBadge(item.status)}</div><p>${esc(item.description)}</p></article>`).join('')}
     </section>
     <div class="section-head reveal"><div><p class="section-kicker">已掌握</p><h2>这些点你是真的会了</h2></div></div>
-    <section class="component-strip reveal" data-d="1">${verified.length ? verified.map(([name])=>`<article><span>✓</span><div><b>${esc(name)}</b><small>已通过三题验证</small></div></article>`).join('') : `<div class="empty-state" style="padding:26px"><img src="assets/empty.png" alt="" class="result-illustration"/><p class="empty" style="padding:0">还没有已掌握的知识点。<br>完成一轮「做题 → 修复 → 验证」后，这里会出现第一个。</p></div>`}</section>
+    <section class="component-strip reveal" data-d="1">${verified.length ? verified.map(([name])=>`<article><span>✓</span><div><b>${esc(name)}</b><small>已通过三题验证</small></div></article>`).join('') : `<div class="empty-state" style="padding:26px"><img src="assets/empty-synthesis.jpg" alt="" class="result-illustration"/><p class="empty" style="padding:0">还没有已掌握的知识点。<br>完成一轮「做题 → 修复 → 验证」后，这里会出现第一个。</p></div>`}</section>
     <div class="section-head reveal"><div><p class="section-kicker">错题档案</p><h2>你踩过的坑</h2></div></div>
     <section class="archive-card reveal" data-d="1">${errorEvents.length ? errorEvents.map(event => `<div class="archive-row"><span class="danger-dot"></span><div><b>指向关系错误</b><small>${esc(event.created_at || event.timestamp || '本次学习')}</small></div><span>${model.events.some(item=>item.event_type==='patch_completed')?'已修复 ✓':'待修复'}</span></div>`).join('') : '<p class="empty">目前还没有错题记录，这是好事。</p>'}</section>
     <div class="section-head reveal"><div><p class="section-kicker">学习流水</p><h2>每一步都有记录</h2></div><span>${model.events.length} 条</span></div>
@@ -541,7 +542,7 @@ function taskCard() {
 }
 
 function learnPage() {
-  if (!model.session) return shell(`<section class="empty-state"><img src="assets/empty.png" alt=""/><h1>还没有开始学习</h1><p>从今天的第一个语法任务开始，体验「错了也能修好」的完整过程。</p><button class="primary" data-action="start">开始学习</button></section>`)
+  if (!model.session) return shell(`<section class="empty-state"><img src="assets/empty-synthesis.jpg" alt=""/><h1>还没有开始学习</h1><p>从今天的第一个语法任务开始，体验「错了也能修好」的完整过程。</p><button class="primary" data-action="start">开始学习</button></section>`)
   if (model.session.state !== 'DONE') return shell(taskCard())
   return shell(`<section class="result-page"><div class="success-mark">✓</div><p class="eyebrow">本轮完成</p><h1>这个语法点，你修好了</h1><p>${esc(model.message || '原题修正 + 三道变式题全部通过，是真正的掌握。')}</p><div class="result-grid"><div><small>定语从句指向</small><strong>${esc(model.session.node_status)}</strong></div><div><small>词根 rupt</small><strong>${esc(model.session.word_status)}</strong></div><div><small>学习记录</small><strong>${model.events.length} 条</strong></div></div><div class="result-actions"><button class="secondary" data-nav="assets">查看学习档案</button><button class="secondary" data-nav="topology">查看知识地图</button><button class="primary compact" data-nav="home">返回首页</button></div><p class="evidence">观察 → 诊断 → 修复 → 验证 · 四步闭环</p></section>`)
 }

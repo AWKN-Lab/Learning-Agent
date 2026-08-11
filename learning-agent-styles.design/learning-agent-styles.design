@@ -1,0 +1,268 @@
+{
+  "data": [
+    {
+      "id": "page-sci-fi",
+      "title": "科幻电影风",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1754908800000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 3455,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-3a94e749",
+          "measuredAt": 1786441031913
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/sci-fi.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-anime",
+      "title": "二次元游戏风",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1754908800001,
+      "canvasData": {
+        "x": 620,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 3476,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-51891644",
+          "measuredAt": 1786441031913
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/anime.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "page-academic",
+      "title": "东方书院风",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1754908800002,
+      "canvasData": {
+        "x": 1240,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 4498,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-60288308",
+          "measuredAt": 1786441031913
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/academic.html",
+        "interactions": []
+      }
+    },
+    {
+      "id": "image-001",
+      "title": "科幻风背景底图",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910000000,
+      "canvasData": {
+        "x": 0,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 2560,
+          "height": 1440
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/bg-sci-fi.jpg"
+      }
+    },
+    {
+      "id": "image-002",
+      "title": "二次元风背景底图",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910000001,
+      "canvasData": {
+        "x": 620,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 2560,
+          "height": 1440
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/bg-anime.jpg"
+      }
+    },
+    {
+      "id": "image-003",
+      "title": "科幻风Hero-全息大脑",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910100000,
+      "canvasData": {
+        "x": 1240,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 2240,
+          "height": 1680
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-sci-fi.jpg"
+      }
+    },
+    {
+      "id": "image-004",
+      "title": "二次元风Hero-魔法向导",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910100001,
+      "canvasData": {
+        "x": 1860,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 2240,
+          "height": 1680
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-anime.jpg"
+      }
+    },
+    {
+      "id": "image-005",
+      "title": "学院风Logo徽章-透明底",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910200000,
+      "canvasData": {
+        "x": 2480,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 1920,
+          "height": 1920
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/aca-logo-v2.png"
+      }
+    },
+    {
+      "id": "image-006",
+      "title": "学院风Hero-书院夜读场景",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910200001,
+      "canvasData": {
+        "x": 3100,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 2240,
+          "height": 1680
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-academic-v2.jpg"
+      }
+    },
+    {
+      "id": "image-007",
+      "title": "子衿·角色设定参考",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910200002,
+      "canvasData": {
+        "x": 3720,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 1672,
+          "height": 941
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/aca-zijin-sheet.png"
+      }
+    },
+    {
+      "id": "image-008",
+      "title": "洛书·角色设定参考",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910200003,
+      "canvasData": {
+        "x": 4340,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 1672,
+          "height": 941
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/aca-luoshu-sheet.png"
+      }
+    },
+    {
+      "id": "image-009",
+      "title": "合成版Hero-书院知识图谱",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910300000,
+      "canvasData": {
+        "x": 4960,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 2240,
+          "height": 1680
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-synthesis.jpg"
+      }
+    },
+    {
+      "id": "image-010",
+      "title": "合成版空状态-等待启程",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1754910300001,
+      "canvasData": {
+        "x": 5580,
+        "y": 377,
+        "hidden": true,
+        "naturalSize": {
+          "width": 1920,
+          "height": 1920
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/empty-synthesis.jpg"
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "文科实验室 · 三风格官网"
+  }
+}
