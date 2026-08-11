@@ -28,27 +28,27 @@
   "profile": {
     "learning_goal": "把英语知识转化为可拆解、可推导、可验证、可积累的逻辑系统。",
     "content_version": "g10_english_u4_mvp",
-    "learning_settings": "当前由 Learning Agent 按真实 Session State 调度；无自由规划。",
-    "data_privacy": "当前 Demo 不建设账号体系；学习状态仅来自当前 Session 与 Learning Events。"
+    "learning_settings": "当前由系统按你的真实学习状态自动安排任务。",
+    "data_privacy": "当前体验版无账号体系；学习数据仅保存在本设备浏览器中。"
   },
   "status_labels": {
     "live": "可使用",
     "limited": "部分开放",
-    "preview": "功能预览",
+    "preview": "即将上线",
     "locked": "待解锁"
   },
   "groups": [
     {
       "id": "decode",
       "name": "逻辑解码",
-      "description": "把词、句、文章转换成可见逻辑结构。",
+      "description": "把词、句、文章拆解成看得懂的逻辑结构。",
       "capabilities": [
         {
           "id": "mece_structure",
           "name": "结构骨架器",
           "status": "preview",
           "icon": "▦",
-          "description": "用 MECE 方式拆文章主干、分支、缺项和重复项。",
+          "description": "把一篇文章拆成主干、分支、缺项和重复项，看清它的骨架。",
           "future_interactions": ["文章分层", "结构拖拽", "主干复原", "缺项识别"]
         },
         {
@@ -56,7 +56,7 @@
           "name": "词根逻辑拆解",
           "status": "limited",
           "icon": "◫",
-          "description": "从前缀、词根、后缀理解构词逻辑。当前真实内容：eruption → e + rupt + ion。",
+          "description": "从前缀、词根、后缀理解构词逻辑。当前内容：eruption → e + rupt + ion。",
           "action": "gold_loop",
           "node": "word.root.rupt"
         },
@@ -65,7 +65,7 @@
           "name": "长难句公式翻译",
           "status": "live",
           "icon": "⌘",
-          "description": "把长难句拆成主句、从句、先行词和指向关系。",
+          "description": "把长难句拆成主句、从句、先行词和指向关系，一句一句看懂。",
           "action": "gold_loop",
           "node": "relative_clause.pointer"
         }
@@ -74,14 +74,14 @@
     {
       "id": "causal",
       "name": "因果推演",
-      "description": "把抽象叙述还原成可追踪的因果和状态变化。",
+      "description": "把抽象叙述还原成能追踪的因果关系和状态变化。",
       "capabilities": [
         {
           "id": "five_whys",
           "name": "5 Whys 因果破译",
           "status": "preview",
           "icon": "?",
-          "description": "连续追问原因，从表面事实追到底层条件。",
+          "description": "连续追问「为什么」，从表面事实追到真正的原因。",
           "future_interactions": ["因果链", "条件追问", "断点定位"]
         },
         {
@@ -105,14 +105,14 @@
     {
       "id": "repair",
       "name": "逻辑修复",
-      "description": "像调试程序一样定位 Logic Bug、修复并做回归测试。",
+      "description": "找到错误的真正原因，修好它，再验证你是真的会了。",
       "capabilities": [
         {
           "id": "error_diagnosis",
           "name": "错题归因",
           "status": "limited",
           "icon": "!",
-          "description": "识别指向、约束、变量替换、因果链和过载等错误类型。当前真实支持 POINTER_ERROR。",
+          "description": "识别指向、约束、替换、因果链、信息过载等错误类型。当前支持：指向关系错误。",
           "action": "repair",
           "node": "relative_clause.pointer"
         },
@@ -121,7 +121,7 @@
           "name": "错一订三",
           "status": "live",
           "icon": "×3",
-          "description": "修复后用 3 道单变量迁移题做 Regression Test。",
+          "description": "修好原题后，再用 3 道变式题确认你是真的掌握了。",
           "action": "gold_loop",
           "node": "relative_clause.pointer"
         },
@@ -138,15 +138,15 @@
     {
       "id": "diagnostic",
       "name": "基线诊断",
-      "description": "在正式学习前识别已有能力和薄弱节点，为 Today Tasks 提供初始状态。",
+      "description": "正式学习前先摸清你的已有能力和薄弱点，作为每日任务的起点。",
       "capabilities": [
         {
           "id": "baseline_diagnostic",
           "name": "基线测试与诊断",
           "status": "preview",
           "icon": "◎",
-          "description": "通过一组初始任务识别已有能力、薄弱节点，并初始化首批学习拓扑。当前 MVP 不制作大规模基线题库。",
-          "future_interactions": ["初始任务", "薄弱节点识别", "拓扑初始化", "首批 Today Tasks"]
+          "description": "通过一组初始任务识别你的已有能力和薄弱点，自动安排第一批每日任务。",
+          "future_interactions": ["初始任务", "薄弱点识别", "知识地图初始化", "首批每日任务"]
         }
       ]
     }
@@ -154,47 +154,47 @@
   "assets": [
     {
       "id": "error_archive",
-      "name": "错误档案",
+      "name": "错题档案",
       "status": "limited",
-      "description": "记录 Logic Bug、证据、提示级别和修复结果。",
+      "description": "记录每道错题的原因、提示次数和修复结果。",
       "action": "assets"
     },
     {
       "id": "repair_log",
       "name": "修复日志",
       "status": "live",
-      "description": "按 Learning Events 回看发现错误、提示、重试和验证。",
+      "description": "回看每次发现错误、提示、重试和验证的完整过程。",
       "action": "assets"
     },
     {
       "id": "learning_history",
       "name": "学习记录",
       "status": "live",
-      "description": "展示当前 Session 的真实学习事件。",
+      "description": "展示你本次学习的每一步真实记录。",
       "action": "assets"
     },
     {
       "id": "component_library",
-      "name": "逻辑组件库",
+      "name": "已掌握组件库",
       "status": "limited",
-      "description": "沉淀已经 VERIFIED、可以复用的逻辑组件。",
+      "description": "沉淀已经通过验证、真正掌握的语法组件。",
       "action": "assets"
     },
     {
       "id": "learning_report",
       "name": "学习效果报告",
       "status": "preview",
-      "description": "未来展示错误变化、迁移成功率、复习表现和节点稳定性。"
+      "description": "未来展示错误变化趋势、变式题通过率、复习表现和知识点稳定性。"
     }
   ],
   "topology": [
-    {"id": "word.root.rupt", "name": "rupt 词根", "group": "Vocabulary", "status": "runtime"},
-    {"id": "suffix.ion", "name": "-ion 后缀", "group": "Vocabulary", "status": "locked"},
-    {"id": "word.structure", "name": "构词结构", "group": "Vocabulary", "status": "locked"},
-    {"id": "relative_clause.pointer", "name": "which 指向关系", "group": "Grammar", "status": "runtime"},
-    {"id": "relative_clause.constraint", "name": "定语从句约束", "group": "Grammar", "status": "locked"},
-    {"id": "relative_clause.substitution", "name": "关系变量替换", "group": "Grammar", "status": "locked"},
-    {"id": "causal_chain", "name": "因果链", "group": "Reading", "status": "preview"},
-    {"id": "article_structure", "name": "文章逻辑骨架", "group": "Reading", "status": "preview"}
+    {"id": "word.root.rupt", "name": "rupt 词根", "group": "词汇", "status": "runtime"},
+    {"id": "suffix.ion", "name": "-ion 后缀", "group": "词汇", "status": "locked"},
+    {"id": "word.structure", "name": "构词结构", "group": "词汇", "status": "locked"},
+    {"id": "relative_clause.pointer", "name": "which 指向关系", "group": "语法", "status": "runtime"},
+    {"id": "relative_clause.constraint", "name": "定语从句约束", "group": "语法", "status": "locked"},
+    {"id": "relative_clause.substitution", "name": "关系词替换", "group": "语法", "status": "locked"},
+    {"id": "causal_chain", "name": "因果链", "group": "阅读", "status": "preview"},
+    {"id": "article_structure", "name": "文章逻辑骨架", "group": "阅读", "status": "preview"}
   ]
 }
