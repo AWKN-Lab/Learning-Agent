@@ -1,9 +1,9 @@
-# 文科实验室 H5 DEMO 工程母文档｜V2.6 Hardened Baseline
+# 文科实验室 H5 工程母文档｜V3.0 Product Shell + Hardened Runtime
 
-> 目标版本：`v0.2.0-hardening`  
+> 对应 PRD：V3.0 完整产品框架版  
 > 更新：2026-08-11  
-> 代码基线：`15edeab92a495300a31d6475f865ed9ea5c0f5e0`  
-> 主分支 CI：`31429090745`，Test / Docker 双绿
+> 工程基线：`8fb4fb3609ccf30b8da05a377fd7dfe7bea702e8` 起始，V3 Closure 分支继续收敛  
+> 核心原则：**Product Shell 可以完整，Learning Runtime 只能依据真实 Content / Evidence 改变学习状态。**
 
 ---
 
@@ -11,25 +11,25 @@
 
 ## 1.1 系统目标
 
-当前版本证明并保护一条真实学习修复闭环：
+文科实验室当前工程同时保护两件事：
 
 ```text
-Observe
-↓
-Diagnose
-↓
-Intervene
-↓
-Verify
-↓
-Update
+A. 完整产品框架
+Dashboard / Today / Lab / Repair / Topology / Assets / Profile
+
+B. 一条真实可验证学习修复闭环
+Observe → Diagnose → Intervene → Verify → Update
 ```
 
-Gold Node：`relative_clause.pointer`。
+当前 Gold Node：`relative_clause.pointer`。
 
-第二能力：`eruption → e + rupt + ion`。
+第二真实能力：`word.root.rupt`，当前内容为：
 
-完成条件：
+```text
+eruption → e + rupt + ion
+```
+
+真实闭环完成条件：
 
 - 主任务真实发生 `POINTER_ERROR`；
 - 最小提示后学生修正；
@@ -37,7 +37,8 @@ Gold Node：`relative_clause.pointer`。
 - `relative_clause.pointer = VERIFIED`；
 - `word.root.rupt = VERIFIED`；
 - Controller 到 `DONE`；
-- Learning Events 包含 diagnosis / patch / state update / completion 证据。
+- Learning Events 包含 diagnosis / patch / state update / completion 证据；
+- Product Shell 的 Dashboard / Repair / Topology / Assets 能投影这些真实结果。
 
 ## 1.2 第一性原理工程主干
 
@@ -53,41 +54,144 @@ Atomic Persistence
 Evidence / Receipt
 ↓
 Learning State
+↓
+Product Projection
 ```
 
 LLM 不负责标准答案、错误类型和长期状态正确性。AI OFF 时主链完整成立。
 
-## 1.3 当前系统架构
+## 1.3 V3 系统架构
 
 ```text
-Browser H5
-    │
-    ▼
+Product Manifest
+完整能力母表 / 状态 / 课程拓扑 / V3 Contract
+        │
+        ▼
+Browser H5 Product Shell
+        │
+        ├─ PREVIEW / LOCKED → 只读产品展示
+        │
+        └─ LIVE / LIMITED + Runtime Evidence
+                         │
+                         ▼
 FastAPI HTTP Boundary
-    │
-    ▼
+        │
+        ▼
 LearningController
 pure deterministic reducer
-    │
-    ▼
-Transactional Store
-SQLite
+        │
+        ▼
+Transactional Store / SQLite
  ├─ sessions
  ├─ learning_events
  ├─ command_receipts
  └─ rate_limits
-    │
-    ├─ Event Replay / Integrity
-    ├─ Session Token / TTL
-    ├─ Optimistic Version
-    └─ Cleanup / Capacity
+        │
+        ├─ Event Replay / Integrity
+        ├─ Session Token / TTL
+        ├─ Optimistic Version
+        └─ Cleanup / Capacity
 ```
+
+## 1.4 V3 真相源
+
+系统严格区分：
+
+```text
+Product Capability Truth → product-manifest.json
+Learning Fact Truth       → Learning Events
+Current Session Truth     → SQLite Session Snapshot
+Derived Product View      → H5 Projection
+```
+
+Product Shell 不得直接制造学习事实；Topology 也只是投影，不是事实源。
 
 ---
 
 # 2. 组件层
 
-## 2.1 Domain｜LearningController
+## 2.1 Product Manifest
+
+文件：`apps/web/product-manifest.json`
+
+职责：
+
+- 维护 PRD V3 功能母表；
+- 维护能力状态；
+- 维护课程拓扑框架；
+- 声明当前 Runtime Scope；
+- 声明允许进入学习 Runtime 的节点；
+- 声明 Preview 不可修改学习状态。
+
+V3 Contract：
+
+```text
+contract.prd_version
+contract.product_shell_version
+contract.runtime_scope
+contract.allowed_runtime_nodes
+contract.preview_can_mutate_learning_state
+contract.shell_pages
+```
+
+当前允许 Runtime Node：
+
+```text
+relative_clause.pointer
+word.root.rupt
+```
+
+任何 PREVIEW capability：
+
+```text
+action = absent
+node   = absent
+```
+
+## 2.2 Product Shell
+
+文件：
+
+```text
+apps/web/index.html
+apps/web/app.js
+apps/web/style.css
+apps/web/product-manifest.json
+```
+
+页面：
+
+```text
+Dashboard
+Today
+Lab
+Repair
+Topology
+Assets
+Profile
+Learning Stage
+Capability Preview
+```
+
+保持零 npm 运行依赖。
+
+Product Shell 职责：
+
+- 展示完整产品架构；
+- 读取 Manifest；
+- 读取真实 Session / Learning Events；
+- 把真实状态投影到产品页面；
+- 对 PREVIEW / LOCKED 只展示能力说明；
+- 只有受允许的 LIVE / LIMITED 能进入真实 Learning Runtime。
+
+禁止：
+
+- 建立第二套学习状态机；
+- 浏览器自行推进学习状态；
+- Preview 写 Learning Events；
+- 生成假成绩、假掌握度、假累计学习量。
+
+## 2.3 Domain｜LearningController
 
 文件：`apps/api/domain.py`
 
@@ -127,13 +231,13 @@ WORD_TASK
 DONE
 ```
 
-## 2.2 Persistence｜Store
+## 2.4 Persistence｜Store
 
 文件：`apps/api/store.py`
 
 职责：
 
-- SQLite Schema / migration；
+- SQLite Schema；
 - Atomic Command；
 - Learning Events；
 - Session Snapshot；
@@ -176,17 +280,9 @@ COMMIT
 
 ### Idempotent Receipt
 
-同一 `command_id` + 完全相同请求：
+同一 `command_id` + 完全相同请求：直接返回原 `response_json`。
 
-```text
-直接返回原 response_json
-```
-
-同一 `command_id` + 不同请求：
-
-```text
-409 command_id_conflict
-```
+同一 `command_id` + 不同请求：`409 command_id_conflict`。
 
 ### Optimistic Concurrency
 
@@ -194,15 +290,11 @@ COMMIT
 
 客户端 mutation 必须携带 `expected_version`。
 
-旧版本请求：
+旧版本请求：`409 state_conflict`。
 
-```text
-409 state_conflict
-```
+正确性不依赖 Python 进程锁。
 
-正确性不再依赖 Python 进程锁。
-
-## 2.3 Runtime Security
+## 2.5 Runtime Security
 
 文件：
 
@@ -232,7 +324,7 @@ Token 错误：`401 session_unauthorized`。
 
 Session 过期：`410 session_expired`。
 
-## 2.4 Runtime Governance
+## 2.6 Runtime Governance
 
 ### TTL
 
@@ -271,35 +363,6 @@ python scripts/cleanup_sessions.py --dry-run --max-sessions 100
 - dry-run；
 - FK cascade 清理 Events / Receipts。
 
-## 2.5 H5
-
-文件：
-
-```text
-apps/web/index.html
-apps/web/app.js
-apps/web/style.css
-```
-
-保持零 npm 运行依赖。
-
-客户端保存：
-
-```text
-session_id
-session_token
-```
-
-Mutation 保存并发送：
-
-```text
-command_id
-expected_version
-X-Session-Token
-```
-
-网络错误只使用原 Command 重试一次。409 时刷新服务器 Session，不在浏览器自行推进状态。
-
 ---
 
 # 3. 模块层
@@ -309,7 +372,7 @@ X-Session-Token
 ```http
 GET  /api/v1/live
 GET  /api/v1/ready
-GET  /api/v1/health          # compatibility
+GET  /api/v1/health
 POST /api/v1/session/start
 GET  /api/v1/session/{id}
 POST /api/v1/learning/step
@@ -336,7 +399,51 @@ Header：
 X-Session-Token: <token>
 ```
 
-## 3.2 Health Contract
+## 3.2 Frontend Session Contract
+
+浏览器本地只保存：
+
+```text
+session_id
+session_token
+```
+
+Mutation 使用：
+
+```text
+command_id / event_id
+expected_version
+X-Session-Token
+```
+
+网络错误只使用原 Command 重试一次。
+
+`409 state_conflict` 时刷新服务器 Session，不在浏览器自行推进状态。
+
+## 3.3 Subpath Deployment Contract
+
+H5 必须可以挂在类似：
+
+```text
+/xueba/
+```
+
+的子路径。
+
+因此：
+
+```text
+app.js
+style.css
+product-manifest.json
+api/v1/...
+```
+
+必须使用相对 URL。
+
+`check_static.py` 明确禁止根绝对前端 URL 回归。
+
+## 3.4 Health Contract
 
 `/live`：只证明进程可响应。
 
@@ -351,7 +458,7 @@ Docker HEALTHCHECK 使用 `/live`。
 
 部署流量切入前检查 `/ready`。
 
-## 3.3 Replay / Integrity
+## 3.5 Replay / Integrity
 
 非生产环境：
 
@@ -374,9 +481,7 @@ content_pack_version
 replay_supported = false
 ```
 
-避免拿新策略错误重放旧 Session。
-
-## 3.4 Structured Logs
+## 3.6 Structured Logs
 
 成功 Mutation 记录：
 
@@ -397,13 +502,32 @@ answer 原文
 session_token
 ```
 
+## 3.7 Baseline Diagnostic
+
+PRD V3 要求保留基线诊断入口。
+
+当前状态：`PREVIEW`。
+
+Manifest 必须包含：
+
+```text
+baseline_diagnostic
+```
+
+当前不建设大规模基线题库，因此：
+
+- 不进入 Learning Runtime；
+- 不初始化假拓扑；
+- 不输出假诊断分数；
+- 只展示未来交互与产品位置。
+
 ---
 
-# 4. 测试与审查门禁
+# 4. 测试与工程门禁
 
-## 4.1 当前 Test Suite
+## 4.1 Core Test Suite
 
-主分支当前覆盖至少：
+覆盖：
 
 - Gold Loop；
 - Receipt Exact Replay；
@@ -424,21 +548,50 @@ session_token
 - Request Body Limit；
 - Production Trusted Hosts。
 
-当前 pytest：`16 passed`。
+V2.6 基线为 `16 passed`。
 
-## 4.2 CI
+## 4.2 PRD V3 Product Contract Tests
+
+新增：`tests/test_product_v3_contract.py`。
+
+验证：
+
+1. `prd_version = 3.0`；
+2. Product Shell 七页契约；
+3. 完整 Capability Matrix；
+4. Preview 不得进入 Runtime；
+5. Runtime Node 集合只能是允许集合；
+6. Topology Runtime Node 与 Contract 完全一致；
+7. Profile Contract 存在；
+8. Baseline Diagnostic 产品入口存在。
+
+## 4.3 Static H5 V3 Contract
+
+`scripts/check_static.py` 验证：
+
+- H5 必需文件；
+- Product Shell 页面函数；
+- V3 Manifest 可解析；
+- V3 功能母表完整；
+- Preview/Runtime 边界；
+- Runtime Node 精确集合；
+- Assets 状态矩阵；
+- Profile Contract；
+- 子路径 URL 安全。
+
+## 4.4 CI
 
 ```text
 pip install
 pip check
 compileall
 pytest
-Authenticated Smoke
-Static Contract
-Cleanup Dry-run
-JS Syntax
-Docker Build
-Docker Runtime
+authenticated smoke
+static H5 V3 contract
+cleanup dry-run
+JS syntax
+Docker build
+Docker runtime
 /ready
 /live
 H5
@@ -446,61 +599,62 @@ Session Token Start
 Container Cleanup Dry-run
 ```
 
-主分支 Run：`31429090745`。
-
-Test / Docker 均 SUCCESS。
+任何一步失败：STOP，不合并。
 
 ---
 
-# 5. 建设性 / 传统审查结论
+# 5. PRD V3 完成判定
 
-本轮已经修正的维护性问题：
-
-1. Controller 与数据库写入耦合 → `domain.py` / `store.py` 分离；
-2. `core.py` 继续膨胀 → 降为兼容导出；
-3. Python `RLock` 承担正确性 → SQLite Transaction + Version；
-4. 重试只返回 NOOP → 持久化 Response Receipt；
-5. Replay 默认相信当前策略 → 增加 Policy / Content Version Guard；
-6. Runtime Error 污染 Domain → 独立 `runtime_errors.py`；
-7. 测试依赖 import 顺序 → 统一 `tests/conftest.py`；
-8. Docker 只 build → runtime smoke；
-9. `/health` 混合 live/ready → 明确拆分；
-10. 无 Session 生命周期 → Token / TTL / Rate / Cleanup。
-
----
-
-# 6. 当前边界
-
-仍未伪装成完成的事项：
-
-1. 公网 Deployment 尚无真实 URL；
-2. 当前 Vercel 连接无可用 Team / Project；
-3. 反向代理后的真实客户端 IP 策略需随具体部署平台配置；应用不会任意信任 `X-Forwarded-For`；
-4. Content-Length 中间件不能替代入口代理对 chunked/streaming body 的硬上限；
-5. SQLite 适用于当前 Demo 规模，真正多实例高并发后再评估 PostgreSQL。
-
-这些边界不会通过引入 Redis / Kafka / 微服务来提前复杂化。
-
----
-
-# 7. 当前完成判定
+必须同时满足：
 
 ```text
-Learning Closed Loop      PASS
+PRD V3 Product Shell      PASS
+Capability Manifest       PASS
+Baseline Entry            PASS
+Gold Learning Loop        PASS
+Real State Projection     PASS
+Preview Isolation         PASS
+Subpath Safe              PASS
 Atomic State              PASS
 Idempotent Receipt        PASS
 Optimistic Concurrency    PASS
-Crash Rollback            PASS
 Event Replay Integrity    PASS
-Session Auth              PASS
-Session TTL               PASS
-Shared Rate Limit         PASS
-Session Cleanup           PASS
-Production Config Guard   PASS
-Local Gates               PASS
+Session Auth / TTL        PASS
+Runtime Governance        PASS
 GitHub CI                 PASS
 Docker Runtime            PASS
-Public Deployment         BLOCKED_EXTERNAL
 ```
 
-下一工程动作只剩：取得真实部署目标 → 配置持久 `/data`、`APP_ENV=production`、`TRUSTED_HOSTS` → Public Smoke → Release / Rollback。
+公网 Deployment 不属于 V3 产品代码完成的必要条件；若没有可用公网目标，继续标记 `BLOCKED_EXTERNAL`，不得伪造 URL、Release 或生产 Rollback。
+
+---
+
+# 6. V3 后续唯一扩展方向
+
+V3 完成后停止继续扩 Product Shell。
+
+下一阶段按真实内容证据逐个解锁：
+
+```text
+relative_clause.constraint
+↓
+更多词根节点
+↓
+MECE Reading Structure
+↓
+5 Whys causal_chain
+↓
+logic_puzzle
+```
+
+每个节点固定执行：
+
+```text
+Content / Runtime Evidence
+→ Test
+→ Manifest State Upgrade
+→ CI
+→ Run Evidence
+```
+
+在 Evidence 成立前，PREVIEW / LOCKED 不升级为 LIVE。
