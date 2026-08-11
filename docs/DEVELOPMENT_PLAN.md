@@ -1,58 +1,134 @@
-# Learning-Agent｜开发执行计划｜P1 Hardened Baseline
+# Learning-Agent｜PRD V3.0 开发执行计划｜Closure Baseline
 
 > 更新：2026-08-11  
-> 当前代码：`15edeab92a495300a31d6475f865ed9ea5c0f5e0`
+> 目标：完成 PRD V3.0 已定义的 Product Shell 与 MVP 真实学习闭环，不把后续 PREVIEW 内容伪装成 LIVE。
 
-# 1. 当前完成状态
+---
 
-```text
-P0 Learning Gold Loop             DONE
-P1-0 Atomic Transaction           DONE
-P1-1 Optimistic Concurrency       DONE
-P1-2 Replay / Integrity           DONE
-P1-3 Session Auth / Input Guard   DONE
-P1-4 TTL / Cleanup / Capacity     DONE
-P1-5 Production Config / Health   DONE
-P1-6 Structured Observability     DONE
-P1-7 Adversarial Full Gate        DONE
-P1-8 Public Deploy                BLOCKED_EXTERNAL
-P1-9 Release                      PENDING_DEPLOY
-P1-10 Production Rollback         PENDING_DEPLOY
-```
+# 1. 系统层｜V3.0 Definition of Done
 
-# 2. 已完成主链
+PRD V3.0 的完成标准固定为：
 
 ```text
-Student Command
-↓
-HTTP Contract / Token / Input Guard
-↓
-SQLite Rate Limit
-↓
-BEGIN IMMEDIATE
-↓
-Session Authorization
-↓
-Receipt Check
-↓
-expected_version Check
-↓
-Pure LearningController.reduce()
-↓
-Command Event + Derived Events
-↓
-Session Snapshot Update
-↓
-Response Receipt
-↓
-COMMIT
-↓
-Exact Retry / Event Replay / Integrity
+完整 Product Shell
++
+完整产品能力母表
++
+当前 Unit 4 MVP 真实 Gold Loop
++
+Dashboard / Repair / Topology / Assets 真实投影
++
+PREVIEW / LOCKED 不写学习事实
++
+Session Restore / Atomic Command / Receipt / Version 保持
++
+CI / Docker Runtime 全绿
 ```
 
-# 3. 当前工程门禁
+V3.0 不要求把 MECE、5 Whys、逻辑解谜等后续内容全部开发成 LIVE。它们必须保留真实产品入口和状态，但没有 Content / Runtime Evidence 时只能保持 PREVIEW。
 
-所有功能变更必须通过：
+---
+
+# 2. 组件层｜当前完成状态
+
+```text
+V3-0 PRD 完整产品框架                 DONE
+V3-1 Product Shell 七页导航             DONE
+V3-2 Product Manifest 能力母表           DONE
+V3-3 MVP Gold Loop 嵌入 Product Shell    DONE
+V3-4 Dashboard 真实状态投影              DONE
+V3-5 Repair 真实错误/提示/修复投影        DONE
+V3-6 Topology 真实节点状态投影           DONE
+V3-7 Assets 真实 Learning Events 投影    DONE
+V3-8 Session Restore / Subpath Safe      DONE
+V3-9 Baseline Diagnostic 产品入口        DONE
+V3-10 V3 Machine Contract / Tests        IN_PROGRESS
+V3-11 CI / Docker Final Gate             PENDING
+V3-12 V3 Run Evidence 收敛               PENDING
+```
+
+当前真实可改变学习状态的节点仍只有：
+
+```text
+relative_clause.pointer
+word.root.rupt
+```
+
+---
+
+# 3. 模块层｜V3 Product Contract
+
+`apps/web/product-manifest.json` 是 V3 产品能力母表。
+
+必须明确：
+
+```text
+prd_version = 3.0
+product_shell_version
+runtime_scope
+allowed_runtime_nodes
+preview_can_mutate_learning_state = false
+shell_pages
+```
+
+能力状态：
+
+```text
+live
+limited
+preview
+locked
+```
+
+规则：
+
+1. `preview` capability 不允许存在 learning runtime `action`；
+2. `preview` capability 不允许绑定 runtime `node`；
+3. `gold_loop / repair` 入口只能绑定 `allowed_runtime_nodes`；
+4. Topology 的 `runtime` 节点集合必须与 `allowed_runtime_nodes` 完全一致；
+5. 新增真实内容时先提供 Content / Runtime Evidence，再提升 Manifest 状态。
+
+---
+
+# 4. V3 完整功能母表
+
+## 4.1 逻辑解码
+
+- MECE 结构骨架器：PREVIEW
+- 词根逻辑拆解：LIMITED
+- 长难句公式翻译：LIVE
+
+## 4.2 因果推演
+
+- 5 Whys：PREVIEW
+- 指令流转：PREVIEW
+- 物理逻辑还原：PREVIEW
+
+## 4.3 逻辑修复
+
+- 错题归因：LIMITED
+- 错一订三：LIVE
+- 逻辑解谜：PREVIEW
+
+## 4.4 学习资产
+
+- 错误档案：LIMITED
+- 修复日志：LIVE
+- 学习记录：LIVE
+- 逻辑组件库：LIMITED
+- 学习效果报告：PREVIEW
+
+## 4.5 基线诊断
+
+- 基线测试与诊断：PREVIEW
+
+该入口属于 PRD V3 产品结构，但当前不建设大规模基线题库，因此不得生成学习事实。
+
+---
+
+# 5. V3 自动门禁
+
+所有变更必须通过：
 
 ```text
 pip check
@@ -60,10 +136,14 @@ pip check
 compileall
 ↓
 pytest
+  ├─ Gold Loop
+  ├─ Atomic Transaction
+  ├─ Runtime Governance
+  └─ PRD V3 Product Contract
 ↓
-authenticated closed-loop smoke
+authenticated smoke
 ↓
-static H5 contract
+static H5 V3 contract
 ↓
 cleanup dry-run
 ↓
@@ -72,128 +152,90 @@ JS syntax
 Docker build
 ↓
 Docker runtime
-↓
-/live
-↓
-/ready
-↓
-H5
-↓
-Session Start + Token
-↓
-Container cleanup dry-run
 ```
 
-# 4. 下一步唯一主线｜P1-8 Public Deploy
+V3 Product Contract 重点防止：
 
-需要一个真实支持：
+- 功能因 MVP 收缩再次被删除；
+- PREVIEW 偷接 learning mutation；
+- 未开发节点被冒充为 runtime node；
+- `/xueba/` 子路径部署再次被根绝对 URL 破坏；
+- Product Shell 与 Learning Runtime 各自维护第二套状态真相。
 
-```text
-Docker/FastAPI
-+
-persistent /data
-+
-environment variables
-```
+---
 
-的部署目标。
-
-最小生产配置：
+# 6. 当前真实学习闭环
 
 ```text
-APP_ENV=production
-TRUSTED_HOSTS=<真实域名>
-LEARNING_DB_PATH=/data/learning-agent.db
-```
-
-建议首发仍保持：
-
-```text
-1 instance
-1 process
-1 worker
-persistent volume
-```
-
-暂不为了扩容引入 Redis / PostgreSQL。
-
-# 5. 部署后 Public Smoke
-
-必须执行：
-
-```text
-GET /
-GET /api/v1/live
-GET /api/v1/ready
-POST /api/v1/session/start
-GET session with token
-wrong answer
-repair
-3 transfer variants
-word task
+Dashboard
+↓
+Today / Lab
+↓
+relative_clause.pointer
+↓
+POINTER_ERROR
+↓
+minimum hint
+↓
+retry
+↓
+3 × transfer verification
+↓
+relative_clause.pointer = VERIFIED
+↓
+word.root.rupt
+↓
+VERIFIED
+↓
 DONE
-refresh restore
-exact command retry
-wrong token
-expired session behavior
-rate limit probe
+↓
+Dashboard / Repair / Topology / Assets 投影
 ```
 
-全部通过才标记 `Public Deploy = PASS`。
+该闭环是 V3 唯一正确性主链，不允许为了扩 Product Shell 修改 reducer 规则。
 
-# 6. P1-9 Release
+---
 
-Public Smoke 通过后：
+# 7. V3 停止条件
+
+当以下条件同时成立，即判定 **PRD V3.0 Development = DONE**：
+
+1. PRD V3 能力母表完整；
+2. Product Shell 七个核心页面存在；
+3. Baseline Diagnostic 产品入口存在；
+4. Preview/Runtime 边界有机器契约；
+5. Gold Loop 仍闭环；
+6. Session Restore 与 `/xueba/` 子路径安全；
+7. GitHub Test SUCCESS；
+8. GitHub Docker SUCCESS；
+9. RUN_EVIDENCE 记录最终 HEAD 与 CI。
+
+公网 Deployment、Release、生产 Rollback 属于部署闭环；如果没有可用公网目标，保持 `BLOCKED_EXTERNAL`，不能伪造完成。
+
+---
+
+# 8. V3 之后
+
+V3 完成后停止继续扩大 Product Shell。下一阶段只允许沿真实 Content Node 推进：
 
 ```text
-版本：v0.2.0-hardening
+relative_clause.constraint
+↓
+更多词根节点
+↓
+MECE Reading Structure
+↓
+5 Whys causal_chain
+↓
+logic_puzzle
 ```
 
-Release Evidence：
+每个节点必须走：
 
 ```text
-commit SHA
-CI Run
-Docker Runtime Run
-Public URL
-Gold Loop Trace
-Atomicity Tests
-Concurrency Tests
-Auth / TTL / Rate Tests
-Public Smoke
-Known Boundaries
+Content / Runtime Evidence
+→ Tests
+→ Manifest preview/locked → limited/live
+→ CI
+→ Evidence
 ```
-
-# 7. P1-10 Rollback
-
-必须真实验证：
-
-```text
-稳定版本部署
-↓
-制造一个可控失败版本
-↓
-/ready 或 Public Smoke FAIL
-↓
-回滚稳定版本
-↓
-重新跑 Public Gold Loop
-↓
-PASS
-```
-
-没有真实部署目标时，只能验证 Git / Docker 可回退性，不能声称完成生产 Rollback。
-
-# 8. 当前明确边界
-
-1. Vercel 连接当前没有 Team / Project；
-2. 反向代理真实客户端 IP 策略必须随部署平台明确，应用不自动信任任意 `X-Forwarded-For`；
-3. `Content-Length` 应用门禁不能替代代理层 streaming body 硬限制；
-4. SQLite 满足当前 Demo；真正进入多实例高并发后再评估 PostgreSQL；
-5. 当前不扩新学科、RAG、LangGraph、pyKT、FSRS、教师后台。
-
-# 9. 停止条件
-
-在 Public Deploy / Release / Rollback 闭环完成前，不开启新的产品能力扩张。
-
-当前剩余工作的真实阻塞已经收敛为一个：**取得可用公网部署目标。**
