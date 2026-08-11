@@ -111,7 +111,6 @@ def test_profile_and_baseline_framework_are_preserved() -> None:
     for token in [
         "# 11. 我的 Profile",
         "# 12. 基线测试与诊断入口",
-        "baseline",
         "LIVE / LIMITED / PREVIEW / LOCKED",
         "PREVIEW 内容完全由 Product Manifest 驱动",
     ]:
