@@ -42,9 +42,25 @@ V3-6 Topology 真实节点状态投影           DONE
 V3-7 Assets 真实 Learning Events 投影    DONE
 V3-8 Session Restore / Subpath Safe      DONE
 V3-9 Baseline Diagnostic 产品入口        DONE
-V3-10 V3 Machine Contract / Tests        IN_PROGRESS
-V3-11 CI / Docker Final Gate             PENDING
-V3-12 V3 Run Evidence 收敛               PENDING
+V3-10 V3 Machine Contract / Tests        DONE
+V3-11 CI / Docker Final Gate             DONE
+V3-12 V3 Run Evidence 收敛               DONE
+```
+
+验证代码 HEAD：
+
+```text
+6795e1f3bcab76224c3270e67d65100796b68383
+```
+
+验证 CI：
+
+```text
+GitHub Actions 31462567705
+Test    SUCCESS
+Docker  SUCCESS
+pytest  21 passed
+Static  STATIC_H5_V3_OK
 ```
 
 当前真实可改变学习状态的节点仍只有：
@@ -198,7 +214,7 @@ Dashboard / Repair / Topology / Assets 投影
 
 # 7. V3 停止条件
 
-当以下条件同时成立，即判定 **PRD V3.0 Development = DONE**：
+以下条件已全部达到：
 
 1. PRD V3 能力母表完整；
 2. Product Shell 七个核心页面存在；
@@ -208,7 +224,15 @@ Dashboard / Repair / Topology / Assets 投影
 6. Session Restore 与 `/xueba/` 子路径安全；
 7. GitHub Test SUCCESS；
 8. GitHub Docker SUCCESS；
-9. RUN_EVIDENCE 记录最终 HEAD 与 CI。
+9. RUN_EVIDENCE 已记录验证 HEAD 与 CI。
+
+因此当前判定：
+
+```text
+PRD V3.0 Development = DONE
+```
+
+最终仍需通过文档收敛后的 PR CI 和合并后的 `main` CI，作为 Git 交付门禁；若其中任何一步失败，状态自动退回 NOT DONE 并继续修复。
 
 公网 Deployment、Release、生产 Rollback 属于部署闭环；如果没有可用公网目标，保持 `BLOCKED_EXTERNAL`，不能伪造完成。
 
