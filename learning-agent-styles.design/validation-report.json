@@ -1,0 +1,156 @@
+{
+  "success": true,
+  "outcome": "passed",
+  "repairable": true,
+  "terminalViolations": [],
+  "terminalBlockingSummary": null,
+  "skillProvenance": {
+    "name": "solo-design",
+    "version": "2026.07.06.8",
+    "version_source": "unknown",
+    "runtime_skill_dir": null,
+    "recorded_at": null,
+    "expected_version": "2026.07.22.00.00.00",
+    "status": "mismatch",
+    "read_status": "ok"
+  },
+  "operatingMode": "free-explore",
+  "renderBlockingErrorCount": 0,
+  "softWarningCount": 7,
+  "renderBlockingErrors": [],
+  "errorSignatures": [],
+  "softWarnings": [
+    "[orchestration-summary] runtime-orchestration-summary.json is missing skillProvenance.name/version/version_source. Version provenance will be reported as observed_unknown by external evaluators.",
+    "[html-quality] academic.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] academic.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] anime.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] anime.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] sci-fi.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] sci-fi.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states."
+  ],
+  "repairPlanHints": [
+    {
+      "errorClass": "hardcoded-color-in-body",
+      "owner": "sub-agent",
+      "repairScope": "targeted-token-replace",
+      "strategy": "targeted_token_replace_once",
+      "affectedFiles": [
+        "academic.html"
+      ],
+      "repairReportPath": null,
+      "repairAlreadyAttempted": false,
+      "allowSourceRead": "no-full-html-read",
+      "maxValidationRuns": 2
+    },
+    {
+      "errorClass": "hardcoded-color-in-body",
+      "owner": "sub-agent",
+      "repairScope": "targeted-token-replace",
+      "strategy": "targeted_token_replace_once",
+      "affectedFiles": [
+        "anime.html"
+      ],
+      "repairReportPath": null,
+      "repairAlreadyAttempted": false,
+      "allowSourceRead": "no-full-html-read",
+      "maxValidationRuns": 2
+    },
+    {
+      "errorClass": "hardcoded-color-in-body",
+      "owner": "sub-agent",
+      "repairScope": "targeted-token-replace",
+      "strategy": "targeted_token_replace_once",
+      "affectedFiles": [
+        "sci-fi.html"
+      ],
+      "repairReportPath": null,
+      "repairAlreadyAttempted": false,
+      "allowSourceRead": "no-full-html-read",
+      "maxValidationRuns": 2
+    }
+  ],
+  "repairActionTable": [],
+  "errorCount": 0,
+  "warningCount": 7,
+  "errors": [],
+  "warnings": [
+    "[orchestration-summary] runtime-orchestration-summary.json is missing skillProvenance.name/version/version_source. Version provenance will be reported as observed_unknown by external evaluators.",
+    "[html-quality] academic.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] academic.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] anime.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] anime.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states.",
+    "[html-quality] sci-fi.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+    "[html-quality] sci-fi.html: free-explore pages must not use secondary/accent brand variables. Use the single primary hue, neutral tints, or --state-success/warning/error/info for real semantic states."
+  ],
+  "validationRunDisciplineStatus": {
+    "declared": true,
+    "restoreMode": false,
+    "maxFullValidationRuns": 2,
+    "validationHistoryCount": 0,
+    "repairLedgerCount": 0,
+    "softWarningsTriggerRepair": false,
+    "terminalState": null,
+    "nextAction": null,
+    "violations": [],
+    "success": true
+  },
+  "terminalState": null,
+  "nextCheck": {
+    "type": "finish-readiness",
+    "command": "node \"c:\\Users\\10919\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-finish-readiness.mjs\" \"d:\\awkn-lab\\Learning-Agent\\learning-agent-styles.design\" --check=all",
+    "fullValidationAllowed": false,
+    "reason": "workspace validation passed; run complete finish readiness before final delivery"
+  },
+  "repairBatch": [],
+  "repairContextPacket": {
+    "schema_version": "1.0",
+    "purpose": "small-context repair packet; read this before full validation-report.json",
+    "success": true,
+    "terminalState": null,
+    "skillProvenance": {
+      "name": "solo-design",
+      "version": "2026.07.06.8",
+      "version_source": "unknown",
+      "runtime_skill_dir": null,
+      "recorded_at": null,
+      "expected_version": "2026.07.22.00.00.00",
+      "status": "mismatch",
+      "read_status": "ok"
+    },
+    "renderBlockingErrorCount": 0,
+    "softWarningCount": 7,
+    "renderBlockingErrors": [],
+    "repairActionTable": [],
+    "nextCheck": {
+      "type": "finish-readiness",
+      "command": "node \"c:\\Users\\10919\\.trae-cn\\builtin\\design\\default\\skills\\solo-design\\shared-runtime\\deterministic-tooling\\validate-finish-readiness.mjs\" \"d:\\awkn-lab\\Learning-Agent\\learning-agent-styles.design\" --check=all",
+      "fullValidationAllowed": false,
+      "reason": "workspace validation passed; run complete finish readiness before final delivery"
+    },
+    "forbidden": [
+      "do not read validator source",
+      "do not rerun full validation when nextCheck.fullValidationAllowed=false",
+      "do not start preview/browser unless user explicitly asks",
+      "do not hand-edit repair ledger fields"
+    ]
+  },
+  "projectFileHashes": {
+    "learning-agent-styles.design": "a588bbf5c4de7baaecf53e2a088f813614e0dbfe7bc18d63d54cccf046e2493b",
+    "runtime-orchestration-summary.json": "bdf30ce3d3c801ccd7dd3a054156aac0206887132d2eb39ee7fa0ae2ae5d1c39",
+    "pages/academic.html": "795b0672d00eb57ee2e05ea1bcbeb6c5f9749ae1bb20a2f8b0b8ac9a4d4e4070",
+    "pages/anime.html": "c8d2d2e5f6288c46ae4635a2fb9e33ebaca9566c18ceff974da271927adf335a",
+    "pages/sci-fi.html": "8381e23c8ef1f569b297f0a796c924b1170ba5a277d610cf5f96fbdc24dfb762",
+    "assets/aca-logo-v2.png": "1493ca559c5dee53e116cd6b1aa35d3b8772fb4de218a18c7dc635619f99a505",
+    "assets/aca-luoshu-sheet.png": "f1a3215b28d60fe4a80ab7d00db7488acfbc096c1045f41904d7419ee57cd659",
+    "assets/aca-zijin-sheet.png": "3eb2de327c9a1e1f402ae396ac8eda5d5a6c0132bd52b4282f15e97ecb106d0e",
+    "assets/bg-anime.jpg": "008af5512d76d8a66b4de751a26e5f557437d647c428b8c1c6fa83085fd3b7c5",
+    "assets/bg-sci-fi.jpg": "b8dd8bcf377cf108fa5349512fe15c0f57baf4b4ba62f039d881b4240d021259",
+    "assets/hero-academic-v2.jpg": "dded1ab9f0b1d87b34eeacd01d70ed70688038993b29fe58387e95c093fb8790",
+    "assets/hero-anime.jpg": "99dfc8eb45a4a1b88269aaec39598dd2b51b00534f3a0f82f389ab433e7e1feb",
+    "assets/hero-sci-fi.jpg": "48234ab103d4e5e111af1804234d14f6ad737b1a696ce1561cc0dfdda5d60248"
+  },
+  "designDir": "d:\\awkn-lab\\Learning-Agent\\learning-agent-styles.design",
+  "expectedPages": 3,
+  "requireInteractions": null,
+  "checkedAt": "2026-08-11T09:36:43.184Z"
+}

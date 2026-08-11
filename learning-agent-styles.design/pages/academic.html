@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文科实验室 | Academic</title>
+    <style id="theme-vars">
+/* Eastern Academy Theme - 东方书院风 (deep blue + gold + cinnabar) */
+:root {
+  --aca-background: #f5f0e6;
+  --aca-foreground: #1a1f2e;
+  --aca-card: #ece4d3;
+  --aca-card-foreground: #1a1f2e;
+  --aca-popover: #ece4d3;
+  --aca-popover-foreground: #1a1f2e;
+  --aca-primary: #1a3a6b;
+  --aca-primary-foreground: #f5f0e6;
+  --aca-secondary: #e2d8c2;
+  --aca-secondary-foreground: #1a1f2e;
+  --aca-muted: #e8dfcb;
+  --aca-muted-foreground: #6b6354;
+  --aca-accent: #a83232;
+  --aca-accent-foreground: #f5f0e6;
+  --aca-destructive: #a83232;
+  --aca-destructive-foreground: #f5f0e6;
+  --aca-border: rgba(26, 58, 107, 0.22);
+  --aca-input: rgba(26, 58, 107, 0.22);
+  --aca-ring: #1a3a6b;
+  --aca-radius-sm: 2px;
+  --aca-radius-md: 4px;
+  --aca-radius-lg: 8px;
+  --aca-radius-xl: 14px;
+
+  /* Extended semantic */
+  --aca-surface-2: #e2d8c2;
+  --aca-ink: #1a1f2e;
+  --aca-ink-soft: #4a4f5e;
+  --aca-gold: #c9a24a;
+  --aca-cinnabar: #a83232;
+  --aca-navy: #1a3a6b;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--aca-background);
+    --color-foreground: var(--aca-foreground);
+    --color-card: var(--aca-card);
+    --color-card-foreground: var(--aca-card-foreground);
+    --color-popover: var(--aca-popover);
+    --color-popover-foreground: var(--aca-popover-foreground);
+    --color-primary: var(--aca-primary);
+    --color-primary-foreground: var(--aca-primary-foreground);
+    --color-secondary: var(--aca-secondary);
+    --color-secondary-foreground: var(--aca-secondary-foreground);
+    --color-muted: var(--aca-muted);
+    --color-muted-foreground: var(--aca-muted-foreground);
+    --color-accent: var(--aca-accent);
+    --color-accent-foreground: var(--aca-accent-foreground);
+    --color-destructive: var(--aca-destructive);
+    --color-destructive-foreground: var(--aca-destructive-foreground);
+    --color-border: var(--aca-border);
+    --color-input: var(--aca-input);
+    --color-ring: var(--aca-ring);
+    --radius-sm: var(--aca-radius-sm);
+    --radius-md: var(--aca-radius-md);
+    --radius-lg: var(--aca-radius-lg);
+    --radius-xl: var(--aca-radius-xl);
+  }
+  @layer base {
+    body { background: var(--aca-background); color: var(--aca-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--aca-background); }
+      .text-background { color: var(--aca-background); }
+      .border-background { border-color: var(--aca-background); }
+      .ring-background { --tw-ring-color: var(--aca-background); }
+      .bg-foreground { background-color: var(--aca-foreground); }
+      .text-foreground { color: var(--aca-foreground); }
+      .border-foreground { border-color: var(--aca-foreground); }
+      .ring-foreground { --tw-ring-color: var(--aca-foreground); }
+      .bg-card { background-color: var(--aca-card); }
+      .text-card { color: var(--aca-card); }
+      .border-card { border-color: var(--aca-card); }
+      .ring-card { --tw-ring-color: var(--aca-card); }
+      .bg-card-foreground { background-color: var(--aca-card-foreground); }
+      .text-card-foreground { color: var(--aca-card-foreground); }
+      .border-card-foreground { border-color: var(--aca-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--aca-card-foreground); }
+      .bg-popover { background-color: var(--aca-popover); }
+      .text-popover { color: var(--aca-popover); }
+      .border-popover { border-color: var(--aca-popover); }
+      .ring-popover { --tw-ring-color: var(--aca-popover); }
+      .bg-popover-foreground { background-color: var(--aca-popover-foreground); }
+      .text-popover-foreground { color: var(--aca-popover-foreground); }
+      .border-popover-foreground { border-color: var(--aca-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--aca-popover-foreground); }
+      .bg-primary { background-color: var(--aca-primary); }
+      .text-primary { color: var(--aca-primary); }
+      .border-primary { border-color: var(--aca-primary); }
+      .ring-primary { --tw-ring-color: var(--aca-primary); }
+      .bg-primary-foreground { background-color: var(--aca-primary-foreground); }
+      .text-primary-foreground { color: var(--aca-primary-foreground); }
+      .border-primary-foreground { border-color: var(--aca-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--aca-primary-foreground); }
+      .bg-secondary { background-color: var(--aca-secondary); }
+      .text-secondary { color: var(--aca-secondary); }
+      .border-secondary { border-color: var(--aca-secondary); }
+      .ring-secondary { --tw-ring-color: var(--aca-secondary); }
+      .bg-secondary-foreground { background-color: var(--aca-secondary-foreground); }
+      .text-secondary-foreground { color: var(--aca-secondary-foreground); }
+      .border-secondary-foreground { border-color: var(--aca-secondary-foreground); }
+      .ring-secondary-foreground { --tw-ring-color: var(--aca-secondary-foreground); }
+      .bg-muted { background-color: var(--aca-muted); }
+      .text-muted { color: var(--aca-muted); }
+      .border-muted { border-color: var(--aca-muted); }
+      .ring-muted { --tw-ring-color: var(--aca-muted); }
+      .bg-muted-foreground { background-color: var(--aca-muted-foreground); }
+      .text-muted-foreground { color: var(--aca-muted-foreground); }
+      .border-muted-foreground { border-color: var(--aca-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--aca-muted-foreground); }
+      .bg-accent { background-color: var(--aca-accent); }
+      .text-accent { color: var(--aca-accent); }
+      .border-accent { border-color: var(--aca-accent); }
+      .ring-accent { --tw-ring-color: var(--aca-accent); }
+      .bg-accent-foreground { background-color: var(--aca-accent-foreground); }
+      .text-accent-foreground { color: var(--aca-accent-foreground); }
+      .border-accent-foreground { border-color: var(--aca-accent-foreground); }
+      .ring-accent-foreground { --tw-ring-color: var(--aca-accent-foreground); }
+      .bg-destructive { background-color: var(--aca-destructive); }
+      .text-destructive { color: var(--aca-destructive); }
+      .border-destructive { border-color: var(--aca-destructive); }
+      .ring-destructive { --tw-ring-color: var(--aca-destructive); }
+      .bg-destructive-foreground { background-color: var(--aca-destructive-foreground); }
+      .text-destructive-foreground { color: var(--aca-destructive-foreground); }
+      .border-destructive-foreground { border-color: var(--aca-destructive-foreground); }
+      .ring-destructive-foreground { --tw-ring-color: var(--aca-destructive-foreground); }
+      .bg-border { background-color: var(--aca-border); }
+      .text-border { color: var(--aca-border); }
+      .border-border { border-color: var(--aca-border); }
+      .ring-border { --tw-ring-color: var(--aca-border); }
+      .bg-input { background-color: var(--aca-input); }
+      .text-input { color: var(--aca-input); }
+      .border-input { border-color: var(--aca-input); }
+      .ring-input { --tw-ring-color: var(--aca-input); }
+      .bg-ring { background-color: var(--aca-ring); }
+      .text-ring { color: var(--aca-ring); }
+      .border-ring { border-color: var(--aca-ring); }
+      .ring-ring { --tw-ring-color: var(--aca-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen antialiased" style="font-family: 'PingFang SC','Microsoft YaHei','Noto Sans SC',Inter,system-ui,sans-serif;">
+    <main>
+
+<!-- ========== CRITICAL LAYOUT CSS ========== -->
+<style>
+  /* === Font Stacks === */
+  .aca-serif, .aca-serif h1, .aca-serif h2, .aca-serif h3, h1.aca-serif, h2.aca-serif, h3.aca-serif {
+    font-family: 'Noto Serif SC','Source Han Serif SC','SimSun','Playfair Display',Georgia,serif !important;
+  }
+  .aca-sans {
+    font-family: 'PingFang SC','Microsoft YaHei','Noto Sans SC',Inter,system-ui,sans-serif !important;
+  }
+  .aca-italic-serif {
+    font-family: 'Playfair Display','Noto Serif SC',Georgia,serif !important;
+    font-style: italic;
+  }
+  .aca-smallcaps {
+    font-variant: small-caps;
+    letter-spacing: 0.15em;
+    text-transform: lowercase;
+  }
+  .aca-letterspace {
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* === Paper Texture === */
+  .aca-paper {
+    background-color: var(--aca-background);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(120,80,40,0.012) 3px,
+        rgba(120,80,40,0.012) 4px
+      );
+  }
+  .aca-paper-2 {
+    background-color: var(--aca-card);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(120,80,40,0.018) 3px,
+        rgba(120,80,40,0.018) 4px
+      );
+  }
+
+  /* === Drop Cap === */
+  .aca-dropcap::first-letter {
+    float: left;
+    font-family: 'Noto Serif SC','Source Han Serif SC','Playfair Display',Georgia,serif;
+    font-size: 3.8em;
+    line-height: 0.85;
+    padding: 0.08em 0.1em 0 0;
+    color: var(--aca-primary);
+    font-weight: 700;
+  }
+
+  /* === Crest / Seal === */
+  .aca-crest {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid var(--aca-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--aca-card);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .aca-crest::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    border: 0.5px solid rgba(139,26,43,0.3);
+  }
+  .aca-crest-lg {
+    width: 64px;
+    height: 64px;
+  }
+  .aca-crest-lg::after { inset: 5px; }
+
+  /* === Wax Seal === */
+  .aca-seal {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--aca-primary);
+    color: var(--aca-primary-foreground);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display',Georgia,serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transform: rotate(-8deg);
+    box-shadow: 0 1px 3px rgba(139,26,43,0.3), inset 0 0 0 1px rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+
+  /* === Thin Rule === */
+  .aca-rule {
+    border: 0;
+    border-top: 1px solid var(--aca-border);
+    margin: 0;
+  }
+  .aca-rule-primary {
+    border: 0;
+    border-top: 2px solid var(--aca-primary);
+    margin: 0;
+  }
+  .aca-rule-thick {
+    border: 0;
+    border-top: 3px double var(--aca-primary);
+    margin: 0;
+  }
+
+  /* === Chapter Marker === */
+  .aca-chapter {
+    font-family: 'Playfair Display',Georgia,serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.25em;
+    color: var(--aca-muted-foreground);
+    text-transform: uppercase;
+  }
+
+  /* === Side Numeral (for method timeline) === */
+  .aca-numeral {
+    font-family: 'Playfair Display',Georgia,serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--aca-primary);
+    line-height: 1;
+    font-style: italic;
+  }
+
+  /* === Tag Styles === */
+  .aca-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: var(--aca-radius-sm);
+    font-family: 'Playfair Display',Georgia,serif;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+  .aca-tag-live { background: var(--aca-primary); color: var(--aca-primary-foreground); }
+  .aca-tag-preview { background: var(--aca-navy); color: #faf6ef; }
+  .aca-tag-limited { background: var(--aca-forest); color: #faf6ef; }
+
+  /* === CTA Button === */
+  .aca-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--aca-primary);
+    color: var(--aca-primary-foreground);
+    padding: 12px 28px;
+    font-family: 'Noto Serif SC','Source Han Serif SC','Playfair Display',Georgia,serif;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--aca-radius-sm);
+    border: 1px solid var(--aca-primary);
+    transition: background-color 0.15s, color 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .aca-cta:hover {
+    background: #6e1422;
+    border-color: #6e1422;
+  }
+  .aca-cta-lg {
+    padding: 16px 40px;
+    font-size: 1.15rem;
+  }
+
+  /* === Text Link === */
+  .aca-link {
+    color: var(--aca-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: color 0.15s;
+  }
+  .aca-link:hover { color: #6e1422; }
+
+  /* === Nav Link === */
+  .aca-nav-link {
+    font-size: 0.88rem;
+    color: var(--aca-ink-soft);
+    transition: color 0.15s;
+    text-decoration: none;
+    position: relative;
+  }
+  .aca-nav-link:hover { color: var(--aca-primary); }
+
+  /* === Editorial Blockquote / Pull Quote === */
+  .aca-pullquote {
+    border-left: 3px solid var(--aca-primary);
+    padding-left: 16px;
+    font-family: 'Noto Serif SC','Source Han Serif SC','Playfair Display',Georgia,serif;
+    font-style: italic;
+    color: var(--aca-ink);
+  }
+
+  /* === Course Catalog Entry === */
+  .aca-course {
+    border-top: 1px solid var(--aca-border);
+    padding: 20px 0;
+  }
+  .aca-course:first-child { border-top: 0; padding-top: 0; }
+  .aca-course-code {
+    font-family: 'Playfair Display',Georgia,serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    color: var(--aca-primary);
+    font-weight: 600;
+  }
+
+  /* === Timeline Left Rule === */
+  .aca-timeline {
+    position: relative;
+    padding-left: 28px;
+  }
+  .aca-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--aca-primary);
+    opacity: 0.4;
+  }
+  .aca-timeline-dot {
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--aca-background);
+    border: 2px solid var(--aca-primary);
+  }
+
+  /* === Gold Accent for Seals Only === */
+  .aca-gold { color: var(--aca-gold); }
+  .aca-border-gold { border-color: var(--aca-gold); }
+
+  /* === Book Spine Decoration === */
+  .aca-spine {
+    width: 4px;
+    background: linear-gradient(to bottom, var(--aca-primary), var(--aca-gold), var(--aca-primary));
+    border-radius: 1px;
+  }
+
+  /* === Transcript Entry === */
+  .aca-transcript-item {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dotted var(--aca-border);
+    font-size: 0.88rem;
+  }
+  .aca-transcript-item:last-child { border-bottom: 0; }
+
+  /* === Responsive === */
+  @media (max-width: 767px) {
+    .aca-editorial-grid { grid-template-columns: 1fr !important; }
+    .aca-aside { margin-top: 32px; }
+    .aca-dropcap::first-letter { font-size: 2.8em; }
+    .aca-nav-links { display: none !important; }
+    .aca-hero-title { font-size: 2.8rem !important; }
+  }
+  @media (min-width: 768px) {
+    .aca-editorial-grid { display: grid; }
+  }
+
+  /* === Reduced Motion === */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  /* === Body base === */
+  body {
+    background-color: var(--aca-background);
+    color: var(--aca-ink);
+    line-height: 1.75;
+  }
+</style>
+
+
+<!-- ============================================= -->
+<!-- NAVIGATION                                     -->
+<!-- ============================================= -->
+<nav class="w-full" style="border-bottom: 1px solid var(--aca-border); background: var(--aca-background);">
+  <div class="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+    <!-- Left: Crest + Name -->
+    <div class="flex items-center gap-3">
+      <img src="../assets/aca-logo-v2.png" alt="文科实验室" style="height:40px;width:40px;">
+      <div class="hidden md:flex items-baseline gap-2">
+        <span class="aca-serif text-lg font-bold" style="color:var(--aca-ink);">文科实验室</span>
+        <span class="aca-smallcaps text-xs" style="color:var(--aca-muted-foreground);">· Est. MMXXVI</span>
+      </div>
+    </div>
+    <!-- Right: Nav Links + CTA -->
+    <div class="flex items-center gap-8">
+      <div class="aca-nav-links hidden md:flex items-center gap-7">
+        <a href="#method" class="aca-nav-link aca-serif">课程体系</a>
+        <a href="#method" class="aca-nav-link aca-serif">教学方法</a>
+        <a href="#evidence" class="aca-nav-link aca-serif">学术成果</a>
+        <a href="#admissions" class="aca-nav-link aca-serif">关于我们</a>
+      </div>
+      <a href="#admissions" class="aca-cta" style="padding:8px 20px;font-size:0.88rem;">申请入学</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ============================================= -->
+<!-- SECTION I: HERO (Editorial Cover)              -->
+<!-- ============================================= -->
+<section class="aca-paper py-16 md:py-24">
+  <div class="max-w-6xl mx-auto px-6 md:px-10">
+
+    <!-- Thin top rule -->
+    <hr class="aca-rule-primary mb-12">
+
+    <div class="aca-editorial-grid" style="grid-template-columns: 7fr 5fr; gap: 48px; align-items: start;">
+
+      <!-- LEFT: Main Editorial Block (7-col) -->
+      <div>
+        <!-- Overline -->
+        <p class="aca-letterspace text-xs mb-6" style="color:var(--aca-primary);font-family:'Playfair Display',Georgia,serif;font-weight:600;">
+          A Liberal Arts Laboratory
+        </p>
+
+        <!-- Chinese Title -->
+        <h1 class="aca-serif aca-hero-title font-bold leading-none mb-4" style="font-size:4rem;color:var(--aca-ink);">
+          文科实验室
+        </h1>
+
+        <!-- English Subtitle -->
+        <p class="aca-italic-serif text-xl mb-3" style="color:var(--aca-ink-soft);">
+          Learning Agent · For the Scientific Mind
+        </p>
+
+        <!-- Latin Motto -->
+        <p class="aca-smallcaps text-sm mb-10" style="color:var(--aca-gold);font-family:'Playfair Display',Georgia,serif;font-weight:600;letter-spacing:0.25em;">
+          Disce · Cogita · Inveni
+        </p>
+
+        <!-- Intro Paragraph with Drop Cap -->
+        <p class="aca-dropcap aca-sans mb-10" style="font-size:1.02rem;color:var(--aca-ink);max-width:560px;line-height:1.9;">
+          面向理科思维型高中生的 AI 学习调试系统。我们相信，语言并非不可拆解的黑箱，而是一套可观察、可诊断、可干预、可验证、可更新的逻辑系统。在文科实验室，每一次语言错误都是一个 Bug，每一次理解突破都是一次 Commit。
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-wrap items-center gap-6">
+          <a href="#admissions" class="aca-cta">
+            开始学习
+            <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+          </a>
+          <a href="#" class="aca-link aca-serif text-sm" style="display:inline-flex;align-items:center;gap:4px;">
+            <span>→</span> 下载课程手册
+          </a>
+        </div>
+      </div>
+
+      <!-- RIGHT: Academy scene illustration -->
+      <aside>
+        <!-- Main scene illustration (bottom soft-blends into page cream) -->
+        <div class="relative rounded overflow-hidden mb-5" style="border:1px solid var(--aca-border); box-shadow: 0 20px 60px -20px rgba(26,58,107,0.25);">
+          <img src="../assets/hero-academic-v2.jpg" alt="书院夜读·天枢魔方" class="w-full h-auto block" style="aspect-ratio: 4/3; object-fit: cover;">
+          <!-- Thin gold inner accent line -->
+          <div class="absolute inset-0 pointer-events-none rounded" style="box-shadow: inset 0 0 0 1px rgba(201,162,74,0.2);"></div>
+        </div>
+        <!-- Compact info strip -->
+        <div class="aca-paper-2 p-5 relative" style="border:1px solid var(--aca-border);border-radius:var(--aca-radius-md);">
+          <div style="position:absolute;top:0;left:16px;right:16px;height:2px;background:var(--aca-primary);opacity:0.5;"></div>
+          <p class="aca-serif italic text-sm leading-relaxed mb-4" style="color:var(--aca-ink);">
+            "看到学生怎么想，定位推理链中断的位置，用最少信息帮助学生自己修复。"
+          </p>
+          <hr class="aca-rule mb-3">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs" style="color:var(--aca-ink-soft);">
+            <div><span style="color:var(--aca-muted-foreground);" class="aca-smallcaps">课程</span> <span class="aca-serif font-semibold" style="color:var(--aca-ink);">高一英语必修一</span></div>
+            <div><span style="color:var(--aca-muted-foreground);" class="aca-smallcaps">模块</span> <span class="aca-serif font-semibold" style="color:var(--aca-ink);">6</span></div>
+            <div><span style="color:var(--aca-muted-foreground);" class="aca-smallcaps">版本</span> <span class="aca-serif font-semibold" style="color:var(--aca-primary);">v3.0</span></div>
+            <div><span style="color:var(--aca-muted-foreground);" class="aca-smallcaps">闭环</span> <span class="aca-serif font-semibold" style="color:var(--aca-ink);">1</span></div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SECTION II: TEACHING METHOD                    -->
+<!-- ============================================= -->
+<section id="method" class="aca-paper py-16 md:py-24" style="border-top:1px solid var(--aca-border);">
+  <div class="max-w-6xl mx-auto px-6 md:px-10">
+
+    <!-- Chapter Marker -->
+    <div class="text-center mb-4">
+      <span class="aca-chapter">— II —</span>
+    </div>
+    <p class="text-center aca-smallcaps text-xs mb-3" style="color:var(--aca-muted-foreground);font-family:'Playfair Display',Georgia,serif;">Methodologia</p>
+    <h2 class="aca-serif text-center font-bold text-3xl md:text-4xl mb-4" style="color:var(--aca-ink);">教学方法</h2>
+    <p class="aca-serif text-center text-lg mb-14" style="color:var(--aca-ink-soft);font-style:italic;">学习调试五阶法</p>
+
+    <!-- 5-Stage Timeline -->
+    <div class="max-w-3xl mx-auto">
+      <div class="space-y-0">
+
+        <!-- Stage I -->
+        <div class="aca-timeline relative py-6">
+          <div class="aca-timeline-dot"></div>
+          <div class="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-6 mb-2">
+            <span class="aca-numeral">I</span>
+            <div>
+              <h3 class="aca-serif font-bold text-xl" style="color:var(--aca-ink);">
+                观察
+                <span class="aca-italic-serif text-base ml-2" style="color:var(--aca-muted-foreground);font-weight:400;">Observe</span>
+              </h3>
+            </div>
+          </div>
+          <p class="aca-sans text-sm md:text-base md:ml-[100px]" style="color:var(--aca-ink-soft);line-height:1.8;">
+            捕获学生完整思维路径，而非只看最终答案。错误本身不是问题，推理过程中的断点才是。
+          </p>
+        </div>
+
+        <!-- Stage II -->
+        <div class="aca-timeline relative py-6">
+          <div class="aca-timeline-dot"></div>
+          <div class="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-6 mb-2">
+            <span class="aca-numeral">II</span>
+            <div>
+              <h3 class="aca-serif font-bold text-xl" style="color:var(--aca-ink);">
+                诊断
+                <span class="aca-italic-serif text-base ml-2" style="color:var(--aca-muted-foreground);font-weight:400;">Diagnose</span>
+              </h3>
+            </div>
+          </div>
+          <p class="aca-sans text-sm md:text-base md:ml-[100px]" style="color:var(--aca-ink-soft);line-height:1.8;">
+            定位推理链中断的精确节点。不是"这道题错了"，而是"在处理定语从句指针时，先行词与关系词的映射断裂"。
+          </p>
+        </div>
+
+        <!-- Stage III -->
+        <div class="aca-timeline relative py-6">
+          <div class="aca-timeline-dot"></div>
+          <div class="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-6 mb-2">
+            <span class="aca-numeral">III</span>
+            <div>
+              <h3 class="aca-serif font-bold text-xl" style="color:var(--aca-ink);">
+                干预
+                <span class="aca-italic-serif text-base ml-2" style="color:var(--aca-muted-foreground);font-weight:400;">Intervene</span>
+              </h3>
+            </div>
+          </div>
+          <p class="aca-sans text-sm md:text-base md:ml-[100px]" style="color:var(--aca-ink-soft);line-height:1.8;">
+            给予最少必要信息，让学生自行修复。不直接给答案，而是提供恰好够用的提示，让推理链重新接通。
+          </p>
+        </div>
+
+        <!-- Stage IV -->
+        <div class="aca-timeline relative py-6">
+          <div class="aca-timeline-dot"></div>
+          <div class="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-6 mb-2">
+            <span class="aca-numeral">IV</span>
+            <div>
+              <h3 class="aca-serif font-bold text-xl" style="color:var(--aca-ink);">
+                验证
+                <span class="aca-italic-serif text-base ml-2" style="color:var(--aca-muted-foreground);font-weight:400;">Verify</span>
+              </h3>
+            </div>
+          </div>
+          <p class="aca-sans text-sm md:text-base md:ml-[100px]" style="color:var(--aca-ink-soft);line-height:1.8;">
+            用三道迁移题证明修复真实成立。一道题做对不算会，换个语境仍然做对，才说明知识真正内化。
+          </p>
+        </div>
+
+        <!-- Stage V -->
+        <div class="aca-timeline relative py-6">
+          <div class="aca-timeline-dot"></div>
+          <div class="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-6 mb-2">
+            <span class="aca-numeral">V</span>
+            <div>
+              <h3 class="aca-serif font-bold text-xl" style="color:var(--aca-ink);">
+                更新
+                <span class="aca-italic-serif text-base ml-2" style="color:var(--aca-muted-foreground);font-weight:400;">Update</span>
+              </h3>
+            </div>
+          </div>
+          <p class="aca-sans text-sm md:text-base md:ml-[100px]" style="color:var(--aca-ink-soft);line-height:1.8;">
+            更新知识拓扑，安排后续复习。每一次修复都是知识图谱的一次提交，系统据此规划下一步最优路径。
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SECTION III: CURRICULUM                        -->
+<!-- ============================================= -->
+<section id="curriculum" class="aca-paper py-16 md:py-24" style="border-top:1px solid var(--aca-border);">
+  <div class="max-w-6xl mx-auto px-6 md:px-10">
+
+    <!-- Chapter Marker -->
+    <div class="text-center mb-4">
+      <span class="aca-chapter">— III —</span>
+    </div>
+    <p class="text-center aca-smallcaps text-xs mb-3" style="color:var(--aca-muted-foreground);font-family:'Playfair Display',Georgia,serif;">Curriculum</p>
+    <h2 class="aca-serif text-center font-bold text-3xl md:text-4xl mb-4" style="color:var(--aca-ink);">课程体系</h2>
+    <p class="aca-serif text-center text-lg mb-14" style="color:var(--aca-ink-soft);font-style:italic;">六大核心学程</p>
+
+    <!-- Intro -->
+    <p class="aca-sans text-center max-w-xl mx-auto mb-12 text-sm" style="color:var(--aca-ink-soft);line-height:1.8;">
+      完整产品能力地图，标注当前真实开放程度。我们不画饼，只展示已经验证的教学闭环。
+    </p>
+
+    <!-- Course Catalog: 2-column -->
+    <div class="grid md:grid-cols-2 gap-x-16 gap-y-0 max-w-4xl mx-auto">
+
+      <!-- Course 1: LL-101 -->
+      <div class="aca-course">
+        <div class="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <span class="aca-course-code">LL-101</span>
+            <h3 class="aca-serif font-bold text-lg mt-1" style="color:var(--aca-ink);">逻辑解码</h3>
+          </div>
+          <span class="aca-tag aca-tag-live">Live</span>
+        </div>
+        <p class="aca-sans text-sm" style="color:var(--aca-ink-soft);line-height:1.7;">
+          长难句公式翻译、词根逻辑拆解、MECE 结构骨架。将语言还原为可演算的逻辑结构。
+        </p>
+      </div>
+
+      <!-- Course 2: CE-201 -->
+      <div class="aca-course">
+        <div class="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <span class="aca-course-code">CE-201</span>
+            <h3 class="aca-serif font-bold text-lg mt-1" style="color:var(--aca-ink);">因果推演</h3>
+          </div>
+          <span class="aca-tag aca-tag-preview">Preview</span>
+        </div>
+        <p class="aca-sans text-sm" style="color:var(--aca-ink-soft);line-height:1.7;">
+          5 Whys 因果链、指令流转模拟、物理逻辑还原。在文本中追踪因果链条的每一环。
+        </p>
+      </div>
+
+      <!-- Course 3: LR-301 -->
+      <div class="aca-course">
+        <div class="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <span class="aca-course-code">LR-301</span>
+            <h3 class="aca-serif font-bold text-lg mt-1" style="color:var(--aca-ink);">逻辑修复</h3>
+          </div>
+          <span class="aca-tag aca-tag-live">Live</span>
+        </div>
+        <p class="aca-sans text-sm" style="color:var(--aca-ink-soft);line-height:1.7;">
+          错题归因、错一订三、逻辑解谜。像调试程序一样定位并修复理解中的每一个 Bug。
+        </p>
+      </div>
+
+      <!-- Course 4: AA-401 -->
+      <div class="aca-course">
+        <div class="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <span class="aca-course-code">AA-401</span>
+            <h3 class="aca-serif font-bold text-lg mt-1" style="color:var(--aca-ink);">学习资产</h3>
+          </div>
+          <span class="aca-tag aca-tag-live">Live</span>
+        </div>
+        <p class="aca-sans text-sm" style="color:var(--aca-ink-soft);line-height:1.7;">
+          Bug 档案、修复日志、逻辑组件库。每一次学习都留下可追溯、可复用的资产记录。
+        </p>
+      </div>
+
+      <!-- Course 5: KT-501 -->
+      <div class="aca-course">
+        <div class="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <span class="aca-course-code">KT-501</span>
+            <h3 class="aca-serif font-bold text-lg mt-1" style="color:var(--aca-ink);">知识拓扑</h3>
+          </div>
+          <span class="aca-tag aca-tag-limited">Limited</span>
+        </div>
+        <p class="aca-sans text-sm" style="color:var(--aca-ink-soft);line-height:1.7;">
+          节点状态、依赖关系、掌握度可视化。知识不是列表，是一张有方向、有权重的图。
+        </p>
+      </div>
+
+      <!-- Course 6: AG-601 -->
+      <div class="aca-course">
+        <div class="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <span class="aca-course-code">AG-601</span>
+            <h3 class="aca-serif font-bold text-lg mt-1" style="color:var(--aca-ink);">Learning Agent</h3>
+          </div>
+          <span class="aca-tag aca-tag-limited">Limited</span>
+        </div>
+        <p class="aca-sans text-sm" style="color:var(--aca-ink-soft);line-height:1.7;">
+          自适应调度、状态感知、下一步推荐。确定性内核 + 生成式增强，核心闭环 AI OFF 时仍可运行。
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SECTION IV: ACADEMIC EVIDENCE                  -->
+<!-- ============================================= -->
+<section id="evidence" class="aca-paper py-16 md:py-24" style="border-top:1px solid var(--aca-border);">
+  <div class="max-w-6xl mx-auto px-6 md:px-10">
+
+    <!-- Chapter Marker -->
+    <div class="text-center mb-4">
+      <span class="aca-chapter">— IV —</span>
+    </div>
+    <p class="text-center aca-smallcaps text-xs mb-3" style="color:var(--aca-muted-foreground);font-family:'Playfair Display',Georgia,serif;">Evidentia</p>
+    <h2 class="aca-serif text-center font-bold text-3xl md:text-4xl mb-4" style="color:var(--aca-ink);">学习证据</h2>
+    <p class="aca-serif text-center text-lg mb-14" style="color:var(--aca-ink-soft);font-style:italic;">当前真实进度</p>
+
+    <!-- Asymmetric 7:5 layout -->
+    <div class="aca-editorial-grid max-w-4xl mx-auto" style="grid-template-columns: 7fr 5fr; gap: 48px; align-items: start;">
+
+      <!-- LEFT: Text Explanation -->
+      <div>
+        <div class="space-y-6">
+          <p class="aca-sans" style="font-size:0.98rem;color:var(--aca-ink);line-height:1.9;">
+            当前仅有<span class="aca-serif font-bold" style="color:var(--aca-primary);">高一英语必修一 · Unit 4 Natural Disasters</span>的内容进入真实学习闭环。
+          </p>
+          <p class="aca-sans" style="font-size:0.98rem;color:var(--aca-ink);line-height:1.9;">
+            核心闭环包含：<code style="font-family:'Playfair Display',Georgia,serif;background:var(--aca-card);padding:2px 6px;border-radius:var(--aca-radius-sm);font-size:0.88rem;color:var(--aca-primary);">relative_clause.pointer</code> 指向错误修复，<code style="font-family:'Playfair Display',Georgia,serif;background:var(--aca-card);padding:2px 6px;border-radius:var(--aca-radius-sm);font-size:0.88rem;color:var(--aca-primary);">word.root.rupt</code> 词根学习。
+          </p>
+          <p class="aca-sans" style="font-size:0.98rem;color:var(--aca-ink);line-height:1.9;">
+            我们不伪造学习数据，不生成虚假的掌握度百分比。每一个 <span class="aca-smallcaps" style="font-family:'Playfair Display',Georgia,serif;color:var(--aca-primary);font-weight:600;">Verified</span> 节点，都有真实的学习事件证据。
+          </p>
+        </div>
+
+        <!-- Decorative: small icons row with labels -->
+        <div class="mt-10 flex items-center gap-6" style="color:var(--aca-ink-soft);">
+          <div class="flex items-center gap-2">
+            <i data-lucide="beaker" style="width:16px;height:16px;color:var(--aca-primary);"></i>
+            <span class="aca-serif text-xs">实验可复现</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield" style="width:16px;height:16px;color:var(--aca-primary);"></i>
+            <span class="aca-serif text-xs">确定性内核</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="git-branch" style="width:16px;height:16px;color:var(--aca-primary);"></i>
+            <span class="aca-serif text-xs">可追溯日志</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Transcript / Record Panel -->
+      <aside class="aca-aside">
+        <div class="aca-paper-2 p-7 relative" style="border:1px solid var(--aca-border);border-radius:var(--aca-radius-md);">
+          <!-- Wax Seal -->
+          <div class="absolute -top-3 -right-3 aca-seal">
+            Verified
+          </div>
+
+          <!-- Header -->
+          <div class="flex items-center gap-2 mb-5">
+            <i data-lucide="scroll" style="width:16px;height:16px;color:var(--aca-primary);"></i>
+            <span class="aca-serif font-bold text-sm" style="color:var(--aca-ink);letter-spacing:0.05em;">学术成绩单</span>
+          </div>
+          <p class="aca-smallcaps text-xs mb-4" style="color:var(--aca-muted-foreground);font-family:'Playfair Display',Georgia,serif;">Transcript · MMXXVI</p>
+
+          <hr class="aca-rule mb-4">
+
+          <!-- Verified -->
+          <div class="mb-4">
+            <p class="aca-smallcaps text-xs mb-2" style="color:var(--aca-primary);font-family:'Playfair Display',Georgia,serif;font-weight:600;">已获学分 · Verified</p>
+            <div class="aca-transcript-item">
+              <i data-lucide="check-circle" style="width:14px;height:14px;color:var(--aca-forest);flex-shrink:0;margin-top:3px;"></i>
+              <div>
+                <span class="aca-serif font-semibold text-sm" style="color:var(--aca-ink);">word.root.rupt</span>
+                <span class="aca-sans text-xs ml-2" style="color:var(--aca-muted-foreground);">词根 · 断裂</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- In Progress -->
+          <div class="mb-4">
+            <p class="aca-smallcaps text-xs mb-2" style="color:var(--aca-gold);font-family:'Playfair Display',Georgia,serif;font-weight:600;">在修 · In Progress</p>
+            <div class="aca-transcript-item">
+              <i data-lucide="clock" style="width:14px;height:14px;color:var(--aca-gold);flex-shrink:0;margin-top:3px;"></i>
+              <div>
+                <span class="aca-serif font-semibold text-sm" style="color:var(--aca-ink);">relative_clause.pointer</span>
+                <span class="aca-sans text-xs ml-2" style="color:var(--aca-muted-foreground);">定语从句 · 指针映射</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Locked -->
+          <div>
+            <p class="aca-smallcaps text-xs mb-2" style="color:var(--aca-muted-foreground);font-family:'Playfair Display',Georgia,serif;font-weight:600;">先修课程 · Locked</p>
+            <div class="aca-transcript-item" style="opacity:0.55;">
+              <i data-lucide="lock" style="width:14px;height:14px;color:var(--aca-muted-foreground);flex-shrink:0;margin-top:3px;"></i>
+              <span class="aca-serif text-sm" style="color:var(--aca-ink-soft);">suffix.ion, constraint, substitution…</span>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SECTION V: ADMISSIONS CTA + FOOTER             -->
+<!-- ============================================= -->
+<section id="admissions" class="aca-paper py-20 md:py-28" style="border-top:3px double var(--aca-primary);">
+  <div class="max-w-3xl mx-auto px-6 md:px-10 text-center">
+
+    <!-- Chapter Marker -->
+    <div class="mb-4">
+      <span class="aca-chapter">— V —</span>
+    </div>
+    <p class="aca-smallcaps text-xs mb-3" style="color:var(--aca-muted-foreground);font-family:'Playfair Display',Georgia,serif;">Admissio</p>
+
+    <!-- Large Crest -->
+    <div class="flex justify-center mb-8">
+      <div class="aca-crest aca-crest-lg" style="border-width:2px;">
+        <i data-lucide="compass" style="width:28px;height:28px;color:var(--aca-primary);"></i>
+      </div>
+    </div>
+
+    <h2 class="aca-serif font-bold text-3xl md:text-5xl mb-3" style="color:var(--aca-ink);">开始你的学术之旅</h2>
+    <p class="aca-italic-serif text-lg mb-6" style="color:var(--aca-ink-soft);">Begin Your Studies</p>
+
+    <p class="aca-sans max-w-lg mx-auto mb-10" style="color:var(--aca-ink-soft);font-size:0.95rem;line-height:1.8;">
+      文科实验室目前处于邀请测试阶段。核心闭环 AI OFF 时仍可运行——确定性是我们的底线。
+    </p>
+
+    <!-- Primary CTA -->
+    <div class="mb-6">
+      <a href="#" class="aca-cta aca-cta-lg">
+        申请入学
+        <i data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+      </a>
+    </div>
+
+    <p class="aca-smallcaps text-xs" style="color:var(--aca-muted-foreground);font-family:'Playfair Display',Georgia,serif;letter-spacing:0.2em;">
+      · Deterministic Core + Generative Augmentation ·
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================= -->
+<!-- FOOTER                                         -->
+<!-- ============================================= -->
+<footer class="aca-paper py-10" style="border-top:1px solid var(--aca-border);">
+  <div class="max-w-6xl mx-auto px-6 md:px-10">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+      <!-- Left: Copyright -->
+      <div class="flex items-center gap-3">
+        <div class="aca-crest" style="width:28px;height:28px;">
+          <i data-lucide="book-open" style="width:12px;height:12px;color:var(--aca-primary);"></i>
+        </div>
+        <p class="aca-serif text-xs" style="color:var(--aca-muted-foreground);">
+          © MMXXVI 文科实验室 · Learning Agent
+        </p>
+      </div>
+
+      <!-- Right: Small Nav -->
+      <div class="flex items-center gap-6">
+        <a href="#method" class="aca-smallcaps text-xs" style="color:var(--aca-muted-foreground);text-decoration:none;font-family:'Playfair Display',Georgia,serif;letter-spacing:0.1em;transition:color 0.15s;" onmouseover="this.style.color='var(--aca-primary)'" onmouseout="this.style.color='var(--aca-muted-foreground)'">Curriculum</a>
+        <a href="#method" class="aca-smallcaps text-xs" style="color:var(--aca-muted-foreground);text-decoration:none;font-family:'Playfair Display',Georgia,serif;letter-spacing:0.1em;transition:color 0.15s;" onmouseover="this.style.color='var(--aca-primary)'" onmouseout="this.style.color='var(--aca-muted-foreground)'">Method</a>
+        <a href="#evidence" class="aca-smallcaps text-xs" style="color:var(--aca-muted-foreground);text-decoration:none;font-family:'Playfair Display',Georgia,serif;letter-spacing:0.1em;transition:color 0.15s;" onmouseover="this.style.color='var(--aca-primary)'" onmouseout="this.style.color='var(--aca-muted-foreground)'">Evidence</a>
+        <a href="#" class="aca-smallcaps text-xs" style="color:var(--aca-primary);text-decoration:none;font-family:'Playfair Display',Georgia,serif;letter-spacing:0.1em;transition:color 0.15s;" onmouseover="this.style.color='#6e1422'" onmouseout="this.style.color='var(--aca-primary)'">Contact</a>
+      </div>
+    </div>
+
+    <!-- Motto -->
+    <div class="text-center mt-8">
+      <p class="aca-smallcaps text-xs" style="color:var(--aca-border);font-family:'Playfair Display',Georgia,serif;letter-spacing:0.3em;">
+        Ad Maius Bonum
+      </p>
+    </div>
+  </div>
+</footer>
+
+
+    </main>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.lucide) lucide.createIcons();
+      });
+    </script>
+</body>
+</html>

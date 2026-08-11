@@ -1,0 +1,32 @@
+/* Sci-Fi Blockbuster Theme - 科幻电影大片风 */
+:root {
+  --sci-background: #050a18;
+  --sci-foreground: #e6f4ff;
+  --sci-card: #0a1628;
+  --sci-card-foreground: #e6f4ff;
+  --sci-popover: #0a1628;
+  --sci-popover-foreground: #e6f4ff;
+  --sci-primary: #00d4ff;
+  --sci-primary-foreground: #03131e;
+  --sci-secondary: #0d2138;
+  --sci-secondary-foreground: #e6f4ff;
+  --sci-muted: #0d1f35;
+  --sci-muted-foreground: #7a9bb8;
+  --sci-accent: #ff2d6f;
+  --sci-accent-foreground: #ffffff;
+  --sci-destructive: #ff4d6d;
+  --sci-destructive-foreground: #ffffff;
+  --sci-border: rgba(0, 212, 255, 0.18);
+  --sci-input: rgba(0, 212, 255, 0.18);
+  --sci-ring: #00d4ff;
+  --sci-radius-sm: 2px;
+  --sci-radius-md: 6px;
+  --sci-radius-lg: 12px;
+  --sci-radius-xl: 20px;
+
+  /* Extended semantic */
+  --sci-surface-2: #0f2140;
+  --sci-glow: rgba(0, 212, 255, 0.4);
+  --sci-warning: #ffb547;
+  --sci-success: #00ff9d;
+}

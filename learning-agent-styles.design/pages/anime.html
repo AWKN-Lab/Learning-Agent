@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文科实验室 | Anime</title>
+    <style id="theme-vars">
+/* Anime Game Theme - 二次元游戏风 */
+:root {
+  --ani-background: #0d0820;
+  --ani-foreground: #f5f0ff;
+  --ani-card: #1a1040;
+  --ani-card-foreground: #f5f0ff;
+  --ani-popover: #1a1040;
+  --ani-popover-foreground: #f5f0ff;
+  --ani-primary: #fbbf24;
+  --ani-primary-foreground: #2a1a00;
+  --ani-secondary: #241656;
+  --ani-secondary-foreground: #f5f0ff;
+  --ani-muted: #1f1550;
+  --ani-muted-foreground: #9d8bc8;
+  --ani-accent: #f472b6;
+  --ani-accent-foreground: #ffffff;
+  --ani-destructive: #ff6b8a;
+  --ani-destructive-foreground: #ffffff;
+  --ani-border: rgba(251, 191, 36, 0.22);
+  --ani-input: rgba(251, 191, 36, 0.22);
+  --ani-ring: #fbbf24;
+  --ani-radius-sm: 6px;
+  --ani-radius-md: 12px;
+  --ani-radius-lg: 20px;
+  --ani-radius-xl: 28px;
+
+  /* Extended semantic */
+  --ani-surface-2: #2a1860;
+  --ani-glow: rgba(251, 191, 36, 0.35);
+  --ani-starlight: rgba(244, 114, 182, 0.6);
+  --ani-success: #86efac;
+  --ani-info: #93c5fd;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--ani-background);
+    --color-foreground: var(--ani-foreground);
+    --color-card: var(--ani-card);
+    --color-card-foreground: var(--ani-card-foreground);
+    --color-popover: var(--ani-popover);
+    --color-popover-foreground: var(--ani-popover-foreground);
+    --color-primary: var(--ani-primary);
+    --color-primary-foreground: var(--ani-primary-foreground);
+    --color-secondary: var(--ani-secondary);
+    --color-secondary-foreground: var(--ani-secondary-foreground);
+    --color-muted: var(--ani-muted);
+    --color-muted-foreground: var(--ani-muted-foreground);
+    --color-accent: var(--ani-accent);
+    --color-accent-foreground: var(--ani-accent-foreground);
+    --color-destructive: var(--ani-destructive);
+    --color-destructive-foreground: var(--ani-destructive-foreground);
+    --color-border: var(--ani-border);
+    --color-input: var(--ani-input);
+    --color-ring: var(--ani-ring);
+    --radius-sm: var(--ani-radius-sm);
+    --radius-md: var(--ani-radius-md);
+    --radius-lg: var(--ani-radius-lg);
+    --radius-xl: var(--ani-radius-xl);
+  }
+  @layer base {
+    body { background: var(--ani-background); color: var(--ani-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--ani-background); }
+      .text-background { color: var(--ani-background); }
+      .border-background { border-color: var(--ani-background); }
+      .ring-background { --tw-ring-color: var(--ani-background); }
+      .bg-foreground { background-color: var(--ani-foreground); }
+      .text-foreground { color: var(--ani-foreground); }
+      .border-foreground { border-color: var(--ani-foreground); }
+      .ring-foreground { --tw-ring-color: var(--ani-foreground); }
+      .bg-card { background-color: var(--ani-card); }
+      .text-card { color: var(--ani-card); }
+      .border-card { border-color: var(--ani-card); }
+      .ring-card { --tw-ring-color: var(--ani-card); }
+      .bg-card-foreground { background-color: var(--ani-card-foreground); }
+      .text-card-foreground { color: var(--ani-card-foreground); }
+      .border-card-foreground { border-color: var(--ani-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--ani-card-foreground); }
+      .bg-popover { background-color: var(--ani-popover); }
+      .text-popover { color: var(--ani-popover); }
+      .border-popover { border-color: var(--ani-popover); }
+      .ring-popover { --tw-ring-color: var(--ani-popover); }
+      .bg-popover-foreground { background-color: var(--ani-popover-foreground); }
+      .text-popover-foreground { color: var(--ani-popover-foreground); }
+      .border-popover-foreground { border-color: var(--ani-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--ani-popover-foreground); }
+      .bg-primary { background-color: var(--ani-primary); }
+      .text-primary { color: var(--ani-primary); }
+      .border-primary { border-color: var(--ani-primary); }
+      .ring-primary { --tw-ring-color: var(--ani-primary); }
+      .bg-primary-foreground { background-color: var(--ani-primary-foreground); }
+      .text-primary-foreground { color: var(--ani-primary-foreground); }
+      .border-primary-foreground { border-color: var(--ani-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--ani-primary-foreground); }
+      .bg-secondary { background-color: var(--ani-secondary); }
+      .text-secondary { color: var(--ani-secondary); }
+      .border-secondary { border-color: var(--ani-secondary); }
+      .ring-secondary { --tw-ring-color: var(--ani-secondary); }
+      .bg-secondary-foreground { background-color: var(--ani-secondary-foreground); }
+      .text-secondary-foreground { color: var(--ani-secondary-foreground); }
+      .border-secondary-foreground { border-color: var(--ani-secondary-foreground); }
+      .ring-secondary-foreground { --tw-ring-color: var(--ani-secondary-foreground); }
+      .bg-muted { background-color: var(--ani-muted); }
+      .text-muted { color: var(--ani-muted); }
+      .border-muted { border-color: var(--ani-muted); }
+      .ring-muted { --tw-ring-color: var(--ani-muted); }
+      .bg-muted-foreground { background-color: var(--ani-muted-foreground); }
+      .text-muted-foreground { color: var(--ani-muted-foreground); }
+      .border-muted-foreground { border-color: var(--ani-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--ani-muted-foreground); }
+      .bg-accent { background-color: var(--ani-accent); }
+      .text-accent { color: var(--ani-accent); }
+      .border-accent { border-color: var(--ani-accent); }
+      .ring-accent { --tw-ring-color: var(--ani-accent); }
+      .bg-accent-foreground { background-color: var(--ani-accent-foreground); }
+      .text-accent-foreground { color: var(--ani-accent-foreground); }
+      .border-accent-foreground { border-color: var(--ani-accent-foreground); }
+      .ring-accent-foreground { --tw-ring-color: var(--ani-accent-foreground); }
+      .bg-destructive { background-color: var(--ani-destructive); }
+      .text-destructive { color: var(--ani-destructive); }
+      .border-destructive { border-color: var(--ani-destructive); }
+      .ring-destructive { --tw-ring-color: var(--ani-destructive); }
+      .bg-destructive-foreground { background-color: var(--ani-destructive-foreground); }
+      .text-destructive-foreground { color: var(--ani-destructive-foreground); }
+      .border-destructive-foreground { border-color: var(--ani-destructive-foreground); }
+      .ring-destructive-foreground { --tw-ring-color: var(--ani-destructive-foreground); }
+      .bg-border { background-color: var(--ani-border); }
+      .text-border { color: var(--ani-border); }
+      .border-border { border-color: var(--ani-border); }
+      .ring-border { --tw-ring-color: var(--ani-border); }
+      .bg-input { background-color: var(--ani-input); }
+      .text-input { color: var(--ani-input); }
+      .border-input { border-color: var(--ani-input); }
+      .ring-input { --tw-ring-color: var(--ani-input); }
+      .bg-ring { background-color: var(--ani-ring); }
+      .text-ring { color: var(--ani-ring); }
+      .border-ring { border-color: var(--ani-ring); }
+      .ring-ring { --tw-ring-color: var(--ani-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="bg-starfield min-h-screen">
+
+  <!-- ========== NAV ========== -->
+  <nav class="h-[72px] flex items-center sticky top-0 z-50 glass bg-bg/40 border-b border-line/40">
+    <div class="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-surface-solid border border-gold/30 flex items-center justify-center">
+          <i data-lucide="sparkles" class="w-[18px] h-[18px] text-gold"></i>
+        </div>
+        <div class="leading-tight">
+          <div class="font-semibold text-ink text-base">文科实验室</div>
+          <div class="text-[10px] text-ink-3 tracking-widest font-mono uppercase">ADVENTURE AWAITS</div>
+        </div>
+      </div>
+      <!-- Links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#codex" class="text-sm text-ink-2 hover:text-gold transition-colors">能力图鉴</a>
+        <a href="#quest" class="text-sm text-ink-2 hover:text-gold transition-colors">冒险地图</a>
+        <a href="#constellation" class="text-sm text-ink-2 hover:text-gold transition-colors">星图拓扑</a>
+        <a href="#about" class="text-sm text-ink-2 hover:text-gold transition-colors">关于</a>
+        <button class="bg-gold text-bg px-5 py-2 rounded-lg text-sm font-semibold hover:bg-gold-soft transition-colors gold-glow">
+          开始冒险
+        </button>
+      </div>
+      <!-- Mobile menu button -->
+      <button class="md:hidden text-ink-2" aria-label="menu">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ========== HERO ========== -->
+    <section class="relative min-h-[85vh] flex items-center overflow-hidden">
+      <div class="stars"></div>
+      <div class="max-w-7xl mx-auto w-full px-6 relative z-10 py-20">
+        <div class="md:grid md:grid-cols-[1.2fr_1fr] gap-12 items-center">
+          <!-- Left: Text -->
+          <div>
+            <span class="inline-flex items-center gap-1.5 glass bg-surface border border-line rounded-full px-3 py-1 text-[11px] text-gold-soft font-mono tracking-wider">
+              <i data-lucide="sparkles" class="w-3 h-3"></i>
+              认知冒险 · 启程
+            </span>
+            <h1 class="text-[clamp(44px,7vw,88px)] font-bold leading-[1.05] tracking-[-0.02em] mt-6 text-balance gold-gradient">
+              文科实验室
+            </h1>
+            <div class="text-sm tracking-[0.35em] text-ink-2 mt-4 uppercase font-light">Learning Agent</div>
+            <div class="w-14 h-[2px] bg-gradient-to-r from-gold to-transparent my-7"></div>
+            <p class="text-lg text-ink leading-relaxed max-w-md">开启你的认知冒险之旅。</p>
+            <p class="text-sm text-ink-2 leading-relaxed mt-3 max-w-lg">
+              把英语语法变成可收集的逻辑宝石，在冒险中修复思维 Bug，点亮属于你的知识星座。每一个错误，都是一颗待点亮的星星。
+            </p>
+            <div class="mt-9 flex gap-4 items-center flex-wrap">
+              <button class="bg-gold text-bg px-8 py-3.5 rounded-lg font-semibold gold-glow hover:bg-gold-soft transition-colors text-[15px] inline-flex items-center gap-2">
+                开始冒险
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+              <button class="border border-gold/30 text-gold-soft px-6 py-3.5 rounded-lg text-sm hover:bg-gold/10 transition-colors">
+                能力图鉴
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Hero character illustration with floating skill card -->
+          <div class="mt-12 md:mt-0 relative flex justify-center">
+            <div class="relative w-full max-w-md">
+              <!-- Main character image -->
+              <div class="relative rounded-2xl overflow-hidden border border-gold/20 shadow-[0_20px_80px_-10px_rgba(192,132,252,0.3),0_0_60px_-20px_rgba(251,191,36,0.3)] float-anim">
+                <img src="../assets/hero-anime.jpg" alt="Magical Academy Guide" class="w-full h-auto block" style="aspect-ratio: 4/3; object-fit: cover; object-position: center top;">
+                <!-- Soft glow overlay -->
+                <div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(0deg, rgba(15,10,30,0.3) 0%, transparent 30%, transparent 70%, rgba(192,132,252,0.05) 100%);"></div>
+              </div>
+              <!-- Floating skill card over image (bottom-left) -->
+              <div class="absolute -bottom-3 -left-3 md:-left-6 glass rounded-xl border border-gold/30 p-3 shadow-lg" style="background: rgba(18,10,36,0.85); width: 140px;">
+                <div class="flex items-center gap-1 mb-1.5">
+                  <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+                  <span class="text-[9px] text-ink-3 tracking-widest font-mono uppercase">SKILL</span>
+                </div>
+                <div class="text-sm font-bold text-ink leading-tight">逻辑解码</div>
+                <div class="text-[9px] text-ink-3 tracking-wider font-mono uppercase mt-0.5">LOGIC DECODER</div>
+                <div class="flex gap-0.5 mt-1.5">
+                  <i data-lucide="star" class="w-2.5 h-2.5 text-gold fill-gold"></i>
+                  <i data-lucide="star" class="w-2.5 h-2.5 text-gold fill-gold"></i>
+                  <i data-lucide="star" class="w-2.5 h-2.5 text-gold fill-gold"></i>
+                </div>
+              </div>
+              <!-- Floating star badge (top-right) -->
+              <div class="absolute -top-3 -right-2 md:-right-4 glass rounded-full px-3 py-1.5 border border-gold/30 flex items-center gap-1.5" style="background: rgba(18,10,36,0.85);">
+                <i data-lucide="sparkles" class="w-3 h-3 text-gold"></i>
+                <span class="text-[10px] text-gold-soft font-mono tracking-wider">SSR</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== ABILITY CODEX ========== -->
+    <section id="codex" class="py-20 md:py-28">
+      <div class="max-w-7xl mx-auto px-6">
+        <!-- Header -->
+        <div class="text-center mb-14">
+          <div class="inline-flex items-center gap-2 text-gold text-[11px] tracking-[0.3em] uppercase font-mono">
+            <i data-lucide="sparkles" class="w-3 h-3"></i>
+            Ability Codex
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold mt-3 text-ink">六大职业技能</h2>
+          <div class="w-14 h-[2px] bg-gold/40 mx-auto mt-5"></div>
+        </div>
+        <!-- Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Card 1: 逻辑解码 LIVE -->
+          <div class="bg-surface-solid/70 glass rounded-xl border border-line p-6 card-float relative overflow-hidden">
+            <div class="flex gap-0.5">
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+            </div>
+            <span class="absolute top-5 right-5 text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full border border-gold/40 text-gold bg-gold/10">已解锁</span>
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gold/15 to-transparent border border-gold/20 flex items-center justify-center mt-4">
+              <i data-lucide="cpu" class="w-7 h-7 text-gold"></i>
+            </div>
+            <h3 class="text-lg font-bold text-ink mt-5">逻辑解码</h3>
+            <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-1">LOGIC DECODER</p>
+            <p class="text-sm text-ink-2 mt-3 leading-relaxed">拆解句子与词根，把混乱变成公式</p>
+          </div>
+
+          <!-- Card 2: 因果推演 PREVIEW -->
+          <div class="bg-surface-solid/70 glass rounded-xl border border-line p-6 card-float relative overflow-hidden">
+            <div class="flex gap-0.5">
+              <i data-lucide="star" class="w-3 h-3 text-gold/50 fill-gold/50"></i>
+            </div>
+            <span class="absolute top-5 right-5 text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full border border-ink-3/20 text-ink-3 bg-white/5">预览中</span>
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gold/15 to-transparent border border-gold/20 flex items-center justify-center mt-4">
+              <i data-lucide="git-branch" class="w-7 h-7 text-gold"></i>
+            </div>
+            <h3 class="text-lg font-bold text-ink mt-5">因果推演</h3>
+            <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-1">CAUSAL TRACER</p>
+            <p class="text-sm text-ink-2 mt-3 leading-relaxed">追溯因果链，还原执行流</p>
+          </div>
+
+          <!-- Card 3: 逻辑修复 LIVE -->
+          <div class="bg-surface-solid/70 glass rounded-xl border border-line p-6 card-float relative overflow-hidden">
+            <div class="flex gap-0.5">
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+            </div>
+            <span class="absolute top-5 right-5 text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full border border-gold/40 text-gold bg-gold/10">已解锁</span>
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gold/15 to-transparent border border-gold/20 flex items-center justify-center mt-4">
+              <i data-lucide="bug" class="w-7 h-7 text-gold"></i>
+            </div>
+            <h3 class="text-lg font-bold text-ink mt-5">逻辑修复</h3>
+            <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-1">LOGIC REPAIR</p>
+            <p class="text-sm text-ink-2 mt-3 leading-relaxed">定位 Bug，最小提示，迁移验证</p>
+          </div>
+
+          <!-- Card 4: 学习资产 LIVE -->
+          <div class="bg-surface-solid/70 glass rounded-xl border border-line p-6 card-float relative overflow-hidden">
+            <div class="flex gap-0.5">
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold fill-gold"></i>
+            </div>
+            <span class="absolute top-5 right-5 text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full border border-gold/40 text-gold bg-gold/10">已解锁</span>
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gold/15 to-transparent border border-gold/20 flex items-center justify-center mt-4">
+              <i data-lucide="bookmark" class="w-7 h-7 text-gold"></i>
+            </div>
+            <h3 class="text-lg font-bold text-ink mt-5">学习资产</h3>
+            <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-1">ASSET VAULT</p>
+            <p class="text-sm text-ink-2 mt-3 leading-relaxed">收集逻辑宝石，沉淀认知组件</p>
+          </div>
+
+          <!-- Card 5: 知识拓扑 LIMITED -->
+          <div class="bg-surface-solid/70 glass rounded-xl border border-line p-6 card-float relative overflow-hidden">
+            <div class="flex gap-0.5">
+              <i data-lucide="star" class="w-3 h-3 text-gold/50 fill-gold/50"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold/50 fill-gold/50"></i>
+            </div>
+            <span class="absolute top-5 right-5 text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full border border-ink-3/30 text-ink-2 bg-white/5">部分解锁</span>
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gold/15 to-transparent border border-gold/20 flex items-center justify-center mt-4">
+              <i data-lucide="network" class="w-7 h-7 text-gold"></i>
+            </div>
+            <h3 class="text-lg font-bold text-ink mt-5">知识拓扑</h3>
+            <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-1">KNOWLEDGE TOPOLOGY</p>
+            <p class="text-sm text-ink-2 mt-3 leading-relaxed">点亮知识星座，看见依赖关系</p>
+          </div>
+
+          <!-- Card 6: Learning Agent LIMITED -->
+          <div class="bg-surface-solid/70 glass rounded-xl border border-line p-6 card-float relative overflow-hidden">
+            <div class="flex gap-0.5">
+              <i data-lucide="star" class="w-3 h-3 text-gold/50 fill-gold/50"></i>
+              <i data-lucide="star" class="w-3 h-3 text-gold/50 fill-gold/50"></i>
+            </div>
+            <span class="absolute top-5 right-5 text-[10px] font-mono tracking-wider px-2 py-0.5 rounded-full border border-ink-3/30 text-ink-2 bg-white/5">部分解锁</span>
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gold/15 to-transparent border border-gold/20 flex items-center justify-center mt-4">
+              <i data-lucide="bot" class="w-7 h-7 text-gold"></i>
+            </div>
+            <h3 class="text-lg font-bold text-ink mt-5">Learning Agent</h3>
+            <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-1">ADVENTURE GUIDE</p>
+            <p class="text-sm text-ink-2 mt-3 leading-relaxed">你的专属冒险向导</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== QUESTLINE ========== -->
+    <section id="quest" class="py-20 md:py-28 border-t border-line/50">
+      <div class="max-w-7xl mx-auto px-6">
+        <!-- Header -->
+        <div class="text-center mb-14">
+          <div class="inline-flex items-center gap-2 text-gold text-[11px] tracking-[0.3em] uppercase font-mono">
+            <i data-lucide="sparkles" class="w-3 h-3"></i>
+            Quest Protocol
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold mt-3 text-ink">五步调试之旅</h2>
+          <div class="w-14 h-[2px] bg-gold/40 mx-auto mt-5"></div>
+        </div>
+        <!-- Quest nodes -->
+        <div class="relative">
+          <!-- Desktop connecting line -->
+          <div class="hidden md:block absolute top-5 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+          <div class="md:flex md:justify-between md:items-start flex flex-col md:flex-row gap-8 md:gap-0">
+            <!-- Node 1: Observe -->
+            <div class="flex-1 text-center relative">
+              <div class="w-10 h-10 rounded-full bg-surface-solid border-2 border-gold/40 flex items-center justify-center mx-auto relative z-10">
+                <i data-lucide="eye" class="w-[18px] h-[18px] text-gold"></i>
+              </div>
+              <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-3">STAGE 01</p>
+              <p class="text-ink font-semibold text-base mt-1">观察</p>
+              <p class="text-[10px] text-ink-3 tracking-wider font-mono uppercase mt-0.5">Observe</p>
+              <p class="text-xs text-ink-2 mt-2 max-w-[140px] mx-auto leading-relaxed">捕获思维路径</p>
+            </div>
+            <!-- Node 2: Diagnose (CURRENT) -->
+            <div class="flex-1 text-center relative">
+              <div class="w-10 h-10 rounded-full bg-gold border-2 border-gold flex items-center justify-center mx-auto relative z-10 pulse-ring">
+                <i data-lucide="radar" class="w-[18px] h-[18px] text-bg"></i>
+              </div>
+              <p class="text-[10px] text-gold tracking-widest font-mono uppercase mt-3 pulse-gold">STAGE 02</p>
+              <p class="text-gold font-semibold text-base mt-1">诊断</p>
+              <p class="text-[10px] text-gold/70 tracking-wider font-mono uppercase mt-0.5">Diagnose</p>
+              <p class="text-xs text-ink-2 mt-2 max-w-[140px] mx-auto leading-relaxed">定位推理断点</p>
+            </div>
+            <!-- Node 3: Intervene -->
+            <div class="flex-1 text-center relative">
+              <div class="w-10 h-10 rounded-full bg-surface-solid border-2 border-gold/40 flex items-center justify-center mx-auto relative z-10">
+                <i data-lucide="zap" class="w-[18px] h-[18px] text-gold"></i>
+              </div>
+              <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-3">STAGE 03</p>
+              <p class="text-ink font-semibold text-base mt-1">干预</p>
+              <p class="text-[10px] text-ink-3 tracking-wider font-mono uppercase mt-0.5">Intervene</p>
+              <p class="text-xs text-ink-2 mt-2 max-w-[140px] mx-auto leading-relaxed">最小必要提示</p>
+            </div>
+            <!-- Node 4: Verify -->
+            <div class="flex-1 text-center relative">
+              <div class="w-10 h-10 rounded-full bg-surface-solid border-2 border-gold/40 flex items-center justify-center mx-auto relative z-10">
+                <i data-lucide="shield" class="w-[18px] h-[18px] text-gold"></i>
+              </div>
+              <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-3">STAGE 04</p>
+              <p class="text-ink font-semibold text-base mt-1">验证</p>
+              <p class="text-[10px] text-ink-3 tracking-wider font-mono uppercase mt-0.5">Verify</p>
+              <p class="text-xs text-ink-2 mt-2 max-w-[140px] mx-auto leading-relaxed">三道迁移验证</p>
+            </div>
+            <!-- Node 5: Update -->
+            <div class="flex-1 text-center relative">
+              <div class="w-10 h-10 rounded-full bg-surface-solid border-2 border-gold/40 flex items-center justify-center mx-auto relative z-10">
+                <i data-lucide="star" class="w-[18px] h-[18px] text-gold"></i>
+              </div>
+              <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase mt-3">STAGE 05</p>
+              <p class="text-ink font-semibold text-base mt-1">更新</p>
+              <p class="text-[10px] text-ink-3 tracking-wider font-mono uppercase mt-0.5">Update</p>
+              <p class="text-xs text-ink-2 mt-2 max-w-[140px] mx-auto leading-relaxed">点亮知识星座</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CONSTELLATION ========== -->
+    <section id="constellation" class="py-20 md:py-28 border-t border-line/50">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="md:grid md:grid-cols-[1.2fr_1fr] gap-12 items-center">
+          <!-- Left: SVG Constellation -->
+          <div class="flex flex-col items-center">
+            <svg viewBox="0 0 400 300" class="w-full max-w-[500px]" xmlns="http://www.w3.org/2000/svg">
+              <!-- Background tiny stars -->
+              <circle cx="30" cy="40" r="0.8" fill="rgba(255,255,255,0.4)" />
+              <circle cx="370" cy="60" r="0.6" fill="rgba(255,255,255,0.3)" />
+              <circle cx="80" cy="260" r="0.7" fill="rgba(255,255,255,0.35)" />
+              <circle cx="350" cy="250" r="0.8" fill="rgba(255,255,255,0.4)" />
+              <circle cx="200" cy="20" r="0.5" fill="rgba(192,132,252,0.4)" />
+              <circle cx="60" cy="140" r="0.6" fill="rgba(255,255,255,0.3)" />
+              <circle cx="340" cy="150" r="0.5" fill="rgba(251,191,36,0.3)" />
+
+              <!-- Constellation lines -->
+              <line x1="200" y1="150" x2="100" y2="80" class="constellation-line" />
+              <line x1="200" y1="150" x2="310" y2="70" class="constellation-line" />
+              <line x1="200" y1="150" x2="320" y2="210" class="constellation-line" />
+              <line x1="200" y1="150" x2="90" y2="220" class="constellation-line" />
+
+              <!-- Central node: relative_clause (LEARNING - pulsing gold) -->
+              <circle cx="200" cy="150" r="14" class="constellation-node-learning" />
+              <text x="200" y="185" text-anchor="middle" fill="#fcd34d" font-size="10" font-family="monospace" letter-spacing="0.05em">relative_clause</text>
+
+              <!-- Node: word.root.rupt (VERIFIED - gold with check) -->
+              <circle cx="100" cy="80" r="8" class="constellation-node" />
+              <text x="100" y="62" text-anchor="middle" fill="#fbbf24" font-size="9" font-family="monospace">word.root.rupt</text>
+              <text x="100" y="100" text-anchor="middle" fill="#86efac" font-size="8" font-family="monospace" letter-spacing="0.1em">VERIFIED</text>
+              <text x="100" y="83" text-anchor="middle" fill="#0f0a1e" font-size="9" font-weight="bold">✓</text>
+
+              <!-- Node: suffix.ion (LOCKED - dim) -->
+              <circle cx="310" cy="70" r="7" class="constellation-node-dim" />
+              <text x="310" y="55" text-anchor="middle" fill="#7a6b9e" font-size="9" font-family="monospace">suffix.ion</text>
+              <text x="310" y="88" text-anchor="middle" fill="#7a6b9e" font-size="8" font-family="monospace" letter-spacing="0.1em">LOCKED</text>
+
+              <!-- Node: constraint (LOCKED - dim) -->
+              <circle cx="320" cy="210" r="7" class="constellation-node-dim" />
+              <text x="320" y="232" text-anchor="middle" fill="#7a6b9e" font-size="9" font-family="monospace">constraint</text>
+              <text x="320" y="200" text-anchor="middle" fill="#7a6b9e" font-size="8" font-family="monospace" letter-spacing="0.1em">LOCKED</text>
+
+              <!-- Node: substitution (LOCKED - dim) -->
+              <circle cx="90" cy="220" r="7" class="constellation-node-dim" />
+              <text x="90" y="242" text-anchor="middle" fill="#7a6b9e" font-size="9" font-family="monospace">substitution</text>
+              <text x="90" y="210" text-anchor="middle" fill="#7a6b9e" font-size="8" font-family="monospace" letter-spacing="0.1em">LOCKED</text>
+            </svg>
+            <p class="text-[10px] text-ink-3 tracking-wider font-mono text-center mt-4 uppercase">KNOWLEDGE CONSTELLATION · UNIT 4</p>
+          </div>
+
+          <!-- Right: Stats -->
+          <div class="mt-12 md:mt-0">
+            <div class="inline-flex items-center gap-2 text-gold text-[11px] tracking-[0.3em] uppercase font-mono">
+              <i data-lucide="sparkles" class="w-3 h-3"></i>
+              Star Map
+            </div>
+            <h3 class="text-2xl md:text-3xl font-bold mt-3 text-ink">你的认知星座</h3>
+            <p class="text-sm text-ink-2 leading-relaxed mt-4 max-w-sm">
+              每一个 VERIFIED 节点，都是你真实点亮的星星。我们不伪造进度，不生成虚假的掌握度。
+            </p>
+            <div class="grid grid-cols-2 gap-4 mt-8">
+              <div class="bg-surface/50 glass rounded-xl border border-line/60 p-4">
+                <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase">已点亮</p>
+                <p class="text-3xl font-bold text-gold mt-1 font-mono tabular-nums">2</p>
+              </div>
+              <div class="bg-surface/50 glass rounded-xl border border-line/60 p-4">
+                <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase">当前任务</p>
+                <p class="text-base font-semibold text-ink mt-1">relative_clause</p>
+              </div>
+              <div class="bg-surface/50 glass rounded-xl border border-line/60 p-4">
+                <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase">冒险章节</p>
+                <p class="text-base font-semibold text-ink mt-1">Unit 4</p>
+              </div>
+              <div class="bg-surface/50 glass rounded-xl border border-line/60 p-4">
+                <p class="text-[10px] text-ink-3 tracking-widest font-mono uppercase">宝石收集</p>
+                <p class="text-3xl font-bold text-gold mt-1 font-mono tabular-nums">2</p>
+              </div>
+            </div>
+            <p class="text-[11px] text-ink-3 mt-6 font-mono">当前真实内容：高一英语必修一 · Natural Disasters</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CTA FOOTER ========== -->
+    <section id="about" class="py-20 md:py-28 border-t border-line/50 relative text-center">
+      <!-- Soft gold glow behind center -->
+      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at 50% 50%, rgba(251,191,36,0.08) 0%, transparent 50%);"></div>
+      <div class="stars"></div>
+      <div class="max-w-3xl mx-auto px-6 relative z-10">
+        <p class="text-[11px] tracking-[0.3em] text-gold/70 uppercase font-mono">YOUR ADVENTURE AWAITS</p>
+        <h2 class="text-4xl md:text-5xl font-bold mt-5 gold-gradient text-balance leading-[1.1]">开始你的认知旅程</h2>
+        <p class="text-base text-ink-2 mt-5 max-w-md mx-auto">每一个错误，都是一颗待点亮的星星。</p>
+        <button class="mt-9 bg-gold text-bg px-10 py-4 rounded-xl font-semibold gold-glow hover:bg-gold-soft transition-colors inline-flex items-center gap-2 text-base">
+          立即进入
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+        <p class="mt-8 text-[11px] font-mono text-ink-3 tracking-wider uppercase">DETERMINISTIC CORE + GENERATIVE ENHANCEMENT</p>
+        <!-- Footer links -->
+        <div class="mt-16 flex justify-center gap-8 text-xs text-ink-3">
+          <a href="#" class="hover:text-gold transition-colors">关于</a>
+          <a href="#" class="hover:text-gold transition-colors">隐私</a>
+          <a href="#" class="hover:text-gold transition-colors">文档</a>
+          <a href="#" class="hover:text-gold transition-colors">GitHub</a>
+        </div>
+        <p class="text-[10px] text-ink-3/60 mt-6 font-mono tracking-wider uppercase">&copy; 2026 · LEARNING AGENT · 文科实验室</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+
+    <style>
+    html, body { color: #f5f0ff; min-height: 100%; }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background-color: #120a24;
+      overflow-x: hidden;
+    }
+    /* Fixed background layer with generated image */
+    .bg-starfield {
+      position: relative;
+      isolation: isolate;
+    }
+    .bg-starfield::before {
+      content: '';
+      position: fixed;
+      inset: -5% -5% -5% -5%;
+      z-index: -2;
+      background-image: url('../assets/bg-anime.jpg');
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      animation: bgDrift 35s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+    /* Gradient overlay for readability */
+    .bg-starfield::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(180deg,
+          rgba(15,10,30,0.25) 0%,
+          rgba(15,10,30,0.10) 20%,
+          rgba(15,10,30,0.20) 45%,
+          rgba(12,8,26,0.45) 70%,
+          rgba(10,6,24,0.80) 100%),
+        radial-gradient(ellipse 50% 40% at 30% 20%, rgba(251,191,36,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 70% 80%, rgba(192,132,252,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    @keyframes bgDrift {
+      0% { transform: scale(1.0) translate(0, 0); }
+      50% { transform: scale(1.05) translate(0.8%, -0.6%); }
+      100% { transform: scale(1.02) translate(-0.4%, 0.3%); }
+    }
+    /* Card glass effect to show bg */
+    .surface-card {
+      background-color: rgba(26,19,64,0.55) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    /* Extra twinkle stars overlay */
+    .stars {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 13% 22%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 37% 62%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1.5px 1.5px at 58% 18%, rgba(251,191,36,0.5), transparent),
+        radial-gradient(1px 1px at 75% 44%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 25% 88%, rgba(255,255,255,0.4), transparent);
+    }
+    .stars::after {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 8% 48%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 92% 28%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 70% 92%, rgba(255,255,255,0.3), transparent);
+      animation: twinkle 5s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+    .card-float { transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s; }
+    .card-float:hover { transform: translateY(-4px); border-color: rgba(251,191,36,0.45); box-shadow: 0 16px 48px -12px rgba(251,191,36,0.3); background-color: rgba(42,24,96,0.6) !important; }
+    .gold-glow { box-shadow: 0 0 0 1px rgba(251,191,36,0.35), 0 8px 32px -8px rgba(251,191,36,0.45); }
+    @keyframes pulse-gold { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .pulse-ring::after {
+      content: ''; position: absolute; inset: -4px; border-radius: 9999px;
+      border: 2px solid rgba(251,191,36,0.5); animation: pulse-ring 2s ease-out infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .bg-starfield::before { animation: none; }
+    }
+    .constellation-line { stroke: rgba(251,191,36,0.3); stroke-width: 1; }
+    .constellation-node { fill: #fbbf24; filter: drop-shadow(0 0 6px rgba(251,191,36,0.7)); }
+    .constellation-node-dim { fill: #6a5a8e; }
+    .constellation-node-learning { fill: #fcd34d; filter: drop-shadow(0 0 10px rgba(252,211,77,0.8)); animation: pulse-gold 2s infinite; }
+
+    /* Floating card subtle float animation */
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50% { transform: translateY(-8px) rotate(-2deg); }
+    }
+    .float-anim { animation: floatCard 6s ease-in-out infinite; }
+
+    /* ===== Custom color classes (page-specific) ===== */
+    .bg-surface { background-color: rgba(30,22,60,0.5); }
+    .bg-surface-solid { background-color: rgba(26,19,64,0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .bg-surface-solid\/70 { background-color: rgba(26,19,64,0.55) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .bg-surface\/50 { background-color: rgba(30,22,60,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .border-gold { border-color: #fbbf24; }
+    .border-gold\/20 { border-color: rgba(251,191,36,0.2); }
+    .border-gold\/30 { border-color: rgba(251,191,36,0.3); }
+    .border-gold\/40 { border-color: rgba(251,191,36,0.4); }
+    .border-gold\/45 { border-color: rgba(251,191,36,0.45); }
+    .border-line { border-color: rgba(251,191,36,0.15); }
+    .border-line\/60 { border-color: rgba(251,191,36,0.09); }
+    .text-gold { color: #fbbf24; }
+    .text-gold-soft { color: #fcd34d; }
+    .text-bg { color: #120a24; }
+    .text-ink { color: #f5f0ff; }
+    .text-ink-2 { color: #b8a9d9; }
+    .text-ink-3 { color: #7a6b9e; }
+    .bg-gold { background-color: #fbbf24; }
+    .hover\:bg-gold-soft:hover { background-color: #fde68a; }
+    .gold-gradient {
+      background: linear-gradient(135deg, #fbbf24 0%, #fde68a 40%, #fbbf24 70%, #fef3c7 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      background-size: 200% 200%;
+      animation: goldShimmer 8s ease-in-out infinite;
+    }
+    @keyframes goldShimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .glass { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  </style>
+</body>
+</html>

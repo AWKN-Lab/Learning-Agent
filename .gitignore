@@ -1,0 +1,12 @@
+# 运行时与缓存
+__pycache__/
+.pytest_cache/
+.pytest_tmp/
+*.pyc
+
+# 本地工作区与备份
+.workbuddy/
+_backup/
+
+# 设计预检临时文件
+learning-agent-styles.design/.preflight/

@@ -1,0 +1,33 @@
+/* Anime Game Theme - 二次元游戏风 */
+:root {
+  --ani-background: #0d0820;
+  --ani-foreground: #f5f0ff;
+  --ani-card: #1a1040;
+  --ani-card-foreground: #f5f0ff;
+  --ani-popover: #1a1040;
+  --ani-popover-foreground: #f5f0ff;
+  --ani-primary: #fbbf24;
+  --ani-primary-foreground: #2a1a00;
+  --ani-secondary: #241656;
+  --ani-secondary-foreground: #f5f0ff;
+  --ani-muted: #1f1550;
+  --ani-muted-foreground: #9d8bc8;
+  --ani-accent: #f472b6;
+  --ani-accent-foreground: #ffffff;
+  --ani-destructive: #ff6b8a;
+  --ani-destructive-foreground: #ffffff;
+  --ani-border: rgba(251, 191, 36, 0.22);
+  --ani-input: rgba(251, 191, 36, 0.22);
+  --ani-ring: #fbbf24;
+  --ani-radius-sm: 6px;
+  --ani-radius-md: 12px;
+  --ani-radius-lg: 20px;
+  --ani-radius-xl: 28px;
+
+  /* Extended semantic */
+  --ani-surface-2: #2a1860;
+  --ani-glow: rgba(251, 191, 36, 0.35);
+  --ani-starlight: rgba(244, 114, 182, 0.6);
+  --ani-success: #86efac;
+  --ani-info: #93c5fd;
+}
