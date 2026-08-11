@@ -116,7 +116,7 @@ async function api(path, options = {}) {
 
 async function loadManifest() {
   try {
-    const response = await fetch('/product-manifest.json', {cache:'no-store'})
+    const response = await fetch('product-manifest.json', {cache:'no-store'})
     if (!response.ok) throw new Error('manifest_load_failed')
     model.manifest = await response.json()
   } catch {
@@ -127,9 +127,9 @@ async function loadManifest() {
 async function submitCommand(body) {
   const options = {method:'POST', body:JSON.stringify(body)}
   try {
-    return await api('/api/v1/learning/step', options)
+    return await api('api/v1/learning/step', options)
   } catch (error) {
-    if (error.network) return api('/api/v1/learning/step', options)
+    if (error.network) return api('api/v1/learning/step', options)
     throw error
   }
 }
@@ -146,7 +146,7 @@ function applyResult(data) {
 
 async function refreshSnapshot() {
   if (!model.session) return
-  const snapshot = await api(`/api/v1/session/${model.session.session_id}`)
+  const snapshot = await api(`api/v1/session/${model.session.session_id}`)
   model.session = snapshot.session
   model.task = snapshot.current_task
   model.events = snapshot.events || []
@@ -157,7 +157,7 @@ async function startLearning() {
   model.view = 'learn'
   render()
   try {
-    applyResult(await api('/api/v1/session/start', {method:'POST'}))
+    applyResult(await api('api/v1/session/start', {method:'POST'}))
     await refreshSnapshot()
   } catch (error) {
     model.message = `启动失败：${error.message}`
@@ -178,7 +178,7 @@ async function restore() {
   if (!auth) return
   model.sessionToken = auth.token
   try {
-    const data = await api(`/api/v1/session/${auth.id}`)
+    const data = await api(`api/v1/session/${auth.id}`)
     model.session = data.session
     model.task = data.current_task
     model.events = data.events || []
