@@ -1,10 +1,35 @@
 {
   "version": "3.0",
+  "contract": {
+    "prd_version": "3.0",
+    "product_shell_version": "1.1",
+    "runtime_scope": "g10_english_u4_mvp",
+    "allowed_runtime_nodes": [
+      "relative_clause.pointer",
+      "word.root.rupt"
+    ],
+    "preview_can_mutate_learning_state": false,
+    "shell_pages": [
+      "home",
+      "today",
+      "lab",
+      "repair",
+      "topology",
+      "assets",
+      "profile"
+    ]
+  },
   "course": {
     "grade": "高一",
     "subject": "英语",
     "book": "必修一",
     "unit": "Unit 4 · Natural Disasters"
+  },
+  "profile": {
+    "learning_goal": "把英语知识转化为可拆解、可推导、可验证、可积累的逻辑系统。",
+    "content_version": "g10_english_u4_mvp",
+    "learning_settings": "当前由 Learning Agent 按真实 Session State 调度；无自由规划。",
+    "data_privacy": "当前 Demo 不建设账号体系；学习状态仅来自当前 Session 与 Learning Events。"
   },
   "status_labels": {
     "live": "可使用",
@@ -107,6 +132,21 @@
           "icon": "⌁",
           "description": "用挑战、线索和有限提示训练结构与因果推理。",
           "future_interactions": ["线索解谜", "有限提示", "约束推理"]
+        }
+      ]
+    },
+    {
+      "id": "diagnostic",
+      "name": "基线诊断",
+      "description": "在正式学习前识别已有能力和薄弱节点，为 Today Tasks 提供初始状态。",
+      "capabilities": [
+        {
+          "id": "baseline_diagnostic",
+          "name": "基线测试与诊断",
+          "status": "preview",
+          "icon": "◎",
+          "description": "通过一组初始任务识别已有能力、薄弱节点，并初始化首批学习拓扑。当前 MVP 不制作大规模基线题库。",
+          "future_interactions": ["初始任务", "薄弱节点识别", "拓扑初始化", "首批 Today Tasks"]
         }
       ]
     }
