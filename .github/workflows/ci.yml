@@ -56,6 +56,10 @@ jobs:
           grep -q '"status":"ok"' /tmp/ready.json
           curl -fsS http://127.0.0.1:18000/api/v1/live | grep -q '"status":"ok"'
           curl -fsS http://127.0.0.1:18000/ | grep -q '文科实验室'
+          curl -fsS http://127.0.0.1:18000/product-manifest.json >/tmp/product-manifest.json
+          grep -q '"mece_structure"' /tmp/product-manifest.json
+          grep -q '"five_whys"' /tmp/product-manifest.json
+          grep -q '"logic_puzzle"' /tmp/product-manifest.json
           curl -fsS -X POST http://127.0.0.1:18000/api/v1/session/start >/tmp/session.json
           grep -q '"session_token"' /tmp/session.json
           docker exec learning-agent-ci python scripts/cleanup_sessions.py --dry-run --max-sessions 100 | grep -q '"dry_run": true'

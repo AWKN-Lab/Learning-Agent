@@ -1,384 +1,19 @@
-# 文科实验室 H5 产品需求文档（PRD）｜V2.3 第一性原理版
+# 文科实验室 H5 产品需求文档（PRD）｜V3.0 完整产品框架版
 
 > 项目：AWKN-Lab/Learning-Agent  
-> 版本：V2.3  
+> 版本：V3.0  
 > 日期：2026-08-11  
-> MVP：高一英语 Unit 4  
-> 产品形态：移动端 H5 + Learning Agent
+> 当前真实内容范围：高一英语必修一 Unit 4  
+> 产品形态：移动端 H5 + Learning Agent  
+> 核心原则：**完整产品框架先成立；只有当前 MVP 内容进入真实学习闭环。**
 
 ---
 
 # 1. 产品定义
 
-文科实验室是一套面向理科思维型高中生的**学习调试系统**。
+文科实验室是一套面向理科思维型高中生的 **AI 学习调试系统**。
 
-系统把文科学习任务转成可观察的逻辑过程：
-
-```text
-知识规则
-+
-题目条件
-+
-学生操作
-=
-学生当前推理模型
-```
-
-当学生出错时，系统完成：
-
-```text
-Expected Logic
-vs
-Student Logic
-↓
-Difference
-↓
-Logic Bug
-↓
-最小干预
-↓
-重新推导
-↓
-迁移验证
-↓
-更新学习状态
-```
-
-产品核心价值：**看到学生怎么想，定位逻辑关系在哪一步断裂，用最小提示促使学生自己修复，再用新问题验证修复是否成立。**
-
----
-
-# 2. 第一性目标
-
-MVP 不以“AI 能解释题目”作为完成标准。
-
-唯一核心目标：
-
-> 对一个明确知识节点，系统能够可靠完成“观察 → 诊断 → 干预 → 验证 → 更新”。
-
-首个 Gold Node：
-
-```text
-relative_clause.pointer
-```
-
-首个 Gold Loop：
-
-```text
-任务
-↓
-学生错误
-↓
-pointer_error
-↓
-最低级提示
-↓
-学生重试
-↓
-3 道单变量迁移题
-↓
-验证成功
-↓
-VERIFIED
-```
-
----
-
-# 3. 产品核心能力
-
-## 3.1 Task Model
-
-把题目表示为显式逻辑模型。
-
-示例：
-
-```text
-The ruins in which they were trapped were dangerous.
-```
-
-内部结构：
-
-```text
-main_clause
-├─ subject: the ruins
-└─ predicate: were dangerous
-
-relative_clause
-├─ antecedent: the ruins
-├─ relative_word: which
-├─ prep: in
-└─ pointer: which → ruins
-```
-
-Task Model 是判定学生操作对错的基准。
-
-## 3.2 Evaluator
-
-学生通过点击、连线、框选等操作表达自己的逻辑模型。
-
-Evaluator 比较：
-
-```text
-Expected Model
-vs
-Student Model
-```
-
-输出明确差异，例如：
-
-```text
-POINTER_ERROR
-CONSTRAINT_OMISSION
-VARIABLE_SUBSTITUTION
-CAUSAL_CHAIN_BREAK
-OVERLOAD
-```
-
-## 3.3 Intervention Policy
-
-系统根据错误和尝试次数决定最低必要提示。
-
-提示阶梯：
-
-```text
-P0 独立作答
-P1 指出错误位置
-P2 给结构提示
-P3 给关系提示
-P4 半步推导
-P5 完整解释
-```
-
-规则：
-
-- 第一次错误禁止直接 P5；
-- 每次最多升级一级；
-- 完整解释后仍必须安排迁移验证。
-
-## 3.4 Transfer Verification
-
-“学生说懂了”不计为修复成功。
-
-同一知识节点必须进入新题验证：
-
-```text
-原题错误
-↓
-干预
-↓
-表层不同、底层变量相同的新题
-↓
-验证
-```
-
-MVP 默认 3 道单变量扰动题。
-
-## 3.5 Learner State
-
-P0 使用可解释状态：
-
-```text
-UNKNOWN
-LEARNING
-WEAK
-PATCHING
-VERIFIED
-REVIEW_DUE
-```
-
-不使用缺乏数据依据的伪精确 mastery 小数作为产品结论。
-
----
-
-# 4. Learning Agent 定义
-
-对外称 Learning Agent，P0 内核采用轻量 `LearningController`。
-
-职责仅包含：
-
-```text
-当前在哪个状态
-+
-下一步执行什么动作
-```
-
-P0 不需要自由规划。
-
-主状态：
-
-```text
-TASK
-ANSWER
-HINT
-RETRY
-VERIFY
-DONE
-```
-
-随着真实需求增加再扩展。
-
----
-
-# 5. AI 边界
-
-系统主干必须在 AI 关闭时仍然成立。
-
-核心结构：
-
-```text
-Deterministic Core
-+
-Generative Enhancement
-```
-
-LLM P0 只进入：
-
-1. Explanation：把已确定逻辑结构转换成学生可理解语言；
-2. Variant Candidate Generation：生成候选变式，必须经过确定性验证；
-3. Ambiguous Diagnosis：规则无法确定时提供辅助诊断。
-
-LLM 不负责：
-
-- 决定题目标准答案；
-- 自由修改知识规则；
-- 直接决定长期学习状态；
-- 绕过验证层写入 VERIFIED。
-
----
-
-# 6. MVP 范围
-
-P0 必须完成两条能力链：
-
-## A. Grammar Gold Loop
-
-首要证明学习调试闭环成立：
-
-```text
-relative_clause.pointer
-```
-
-## B. Word Logic Loop
-
-第二条能力证明内核可以复用：
-
-```text
-eruption → e + rupt + ion
-```
-
-当前暂缓：
-
-- 英语全册；
-- 多学科；
-- 教师后台；
-- 家长端；
-- 用户账号体系；
-- RAG；
-- Neo4j；
-- Redis；
-- LangGraph；
-- pyKT Runtime；
-- FSRS Optimizer；
-- 多 Agent。
-
----
-
-# 7. 数据原则
-
-事实来源：
-
-```text
-Learning Events
-↓
-Derived Learning State
-↓
-Topology View
-```
-
-知识拓扑属于状态可视化，不作为事实源。
-
-关键事件：
-
-```text
-session_started
-task_presented
-answer_submitted
-error_detected
-hint_given
-retry_submitted
-verification_started
-verification_answered
-patch_completed
-state_updated
-next_task_selected
-```
-
-所有长期状态必须能够追溯到事件证据。
-
----
-
-# 8. 成功标准
-
-## 学习成功
-
-对于 `relative_clause.pointer`：
-
-```text
-Before: FAIL
-Intervention: 最小必要提示
-Transfer: 3 个新题达到既定通过条件
-After: VERIFIED
-```
-
-## 产品成功
-
-- 学生操作能暴露推理过程；
-- 不同错误会触发不同处理；
-- 提示不会默认泄露答案；
-- 修复必须经过迁移验证；
-- 学习状态有可追溯证据；
-- AI 关闭后 Gold Loop 仍可运行。
-
-## 工程成功
-
-- LIVE / MOCK / FALLBACK 可运行；
-- 刷新可恢复当前会话；
-- 重复提交幂等；
-- 状态跳转受控；
-- CI 全绿；
-- Release / Deploy / Rollback 均经过真实验证。
-
----
-
-# 9. 开发顺序
-
-```text
-P0-0 Outcome Contract
-↓
-P0-1 Gold Learning Loop（无 AI）
-↓
-P0-2 Interaction Model
-↓
-P0-3 Evidence Model
-↓
-P0-4 LearningController
-↓
-P0-5 H5 Vertical Slice
-↓
-P0-6 AI Enhancement
-↓
-P0-7 Word Logic Loop
-↓
-P0-8 Learning State + Topology
-↓
-P0-9 Reliability / E2E / CI
-↓
-Release → Deploy → Git → Rollback
-```
-
----
-
-# 10. 产品最终闭环
+系统把英语等非结构化知识转换成可拆解、可推导、可验证、可积累的逻辑系统，并持续执行：
 
 ```text
 Observe
@@ -392,10 +27,640 @@ Verify
 Update
 ```
 
-文科实验室的核心资产长期沉淀为：
+学生做题时，系统关注的不只是最终选项，还关注学生怎样建立逻辑关系、在哪一步发生错误，以及修复后能否迁移到新问题。
 
-1. Error Model；
-2. Intervention Policy；
-3. Transfer Verification。
+核心价值：
 
-后续扩展到其他英语知识点或其他学科时，优先复用这三层。
+> 看到学生怎么想，定位推理链中断的位置，用最少信息帮助学生自己修复，再用新问题证明修复成立。
+
+---
+
+# 2. V3.0 产品策略
+
+V3.0 明确区分：
+
+```text
+完整产品能力地图
+≠
+当前已经制作好的学习内容
+```
+
+因此所有已定义产品能力都保留在信息架构中，但按照真实完成度标记状态。
+
+## 2.1 功能状态
+
+### LIVE
+
+真实可进入、真实产生学习状态和证据。
+
+### LIMITED
+
+能力真实存在，但当前只开放部分内容、节点或流程。
+
+### PREVIEW
+
+保留完整产品入口、说明和页面结构；当前没有真实训练内容，不伪造学习结果。
+
+### LOCKED
+
+能力和内容存在于产品结构中，但需要先完成前置节点或进入后续内容版本。
+
+### PLANNED
+
+仅在路线图展示，不进入当前产品主导航。
+
+---
+
+# 3. 当前 MVP 内容边界
+
+当前只有以下内容能够真实使用：
+
+```text
+高一英语必修一
+└─ Unit 4 · Natural Disasters
+   ├─ Grammar
+   │  └─ relative_clause.pointer
+   │       主任务
+   │       → POINTER_ERROR
+   │       → 最小提示
+   │       → 重试
+   │       → 3 道迁移验证
+   │       → VERIFIED
+   │
+   └─ Vocabulary
+      └─ word.root.rupt
+           eruption → e + rupt + ion
+           → VERIFIED
+```
+
+当前任何 PREVIEW / LOCKED 功能都不得生成假成绩、假掌握度或假训练记录。
+
+---
+
+# 4. 完整产品信息架构
+
+```text
+文科实验室
+│
+├─ 首页 Dashboard
+├─ 今日学习 Today
+├─ 学习实验室 Lab
+│  ├─ 逻辑解码
+│  ├─ 因果推演
+│  └─ 逻辑修复
+├─ 学习资产 Assets
+├─ 知识拓扑 Topology
+└─ 我的 Profile
+```
+
+Learning Agent 贯穿上述入口，负责读取当前状态、选择当前动作、解释推荐原因和组织学习闭环。
+
+---
+
+# 5. 首页 Dashboard
+
+状态：**LIVE / LIMITED**
+
+首页是完整产品驾驶舱，不再以“开始 Gold Demo”为产品主入口。
+
+页面展示：
+
+- 今日优先任务；
+- 当前课程：高一英语必修一 Unit 4；
+- 当前学习状态；
+- 待修复节点；
+- 待验证节点；
+- 最近一次 Logic Bug；
+- 最近修复；
+- Learning Agent 推荐原因；
+- 学习实验室入口；
+- 知识拓扑摘要；
+- 学习资产摘要。
+
+当前真实数据只来自已有 Gold Loop、Learning Events 和 Session State。
+
+---
+
+# 6. 今日学习 Today
+
+状态：**LIMITED**
+
+目标：把“系统下一步为什么让学生学这个”变成可见产品能力。
+
+完整框架：
+
+```text
+今日优先任务
+待修复
+待验证
+到期复习
+新知识
+下一任务
+```
+
+当前实际仅开放：
+
+- `relative_clause.pointer` 修复任务；
+- `word.root.rupt` 后续能力；
+- 已有 Controller 的 next task 结果。
+
+未来调度优先级：
+
+```text
+阻断错误
+>
+重复错误
+>
+高脆弱节点
+>
+到期复习
+>
+新知识
+```
+
+---
+
+# 7. 学习实验室 Lab
+
+学习实验室保留此前所有核心学习能力。
+
+## 7.1 逻辑解码
+
+### A. MECE 结构骨架器
+
+状态：**PREVIEW**
+
+目标：把文章、段落或知识点拆成互斥且完整的逻辑结构。
+
+未来典型交互：
+
+- 文章分层；
+- 主干 / 分支识别；
+- 结构拖拽；
+- 逻辑骨架复原；
+- 缺项 / 重复项识别。
+
+### B. 词根逻辑拆解器
+
+状态：**LIMITED**
+
+当前真实内容：
+
+```text
+eruption → e + rupt + ion
+```
+
+当前真实节点：`word.root.rupt`。
+
+后续扩展：词根、前缀、后缀、构词关系、同源词迁移。
+
+### C. 长难句公式翻译
+
+状态：**LIVE**
+
+当前真实内容：`relative_clause.pointer`。
+
+完整能力框架：
+
+- 主句识别；
+- 从句边界；
+- 先行词；
+- 指向关系；
+- 约束关系；
+- 变量替换；
+- 句子结构公式化。
+
+当前只开放指向关系节点。
+
+---
+
+## 7.2 因果推演
+
+### A. 5 Whys 因果破译机
+
+状态：**PREVIEW**
+
+目标：连续追问“为什么”，从表面事实追到因果链和底层条件。
+
+### B. 指令流转模拟
+
+状态：**PREVIEW**
+
+目标：把语言、历史、生物等知识过程还原成输入 → 状态变化 → 输出的执行链。
+
+### C. 物理逻辑还原
+
+状态：**PREVIEW**
+
+目标：将抽象叙述还原成角色、条件、空间、时间和动作关系。
+
+以上三个入口必须出现在完整产品中，但当前不产生真实训练结果。
+
+---
+
+## 7.3 逻辑修复
+
+### A. 错题归因 / Logic Bug Diagnosis
+
+状态：**LIVE / LIMITED**
+
+完整错误模型：
+
+```text
+POINTER_ERROR
+CONSTRAINT_OMISSION
+VARIABLE_SUBSTITUTION
+CAUSAL_CHAIN_BREAK
+OVERLOAD
+```
+
+当前真实支持：`POINTER_ERROR`。
+
+### B. 错一订三
+
+状态：**LIVE**
+
+产品定义：错误修复后的 Regression Test。
+
+流程：
+
+```text
+原题错误
+↓
+最小干预
+↓
+重新推导
+↓
+3 个表层不同、底层变量一致的新题
+↓
+迁移验证
+↓
+VERIFIED / 继续修复
+```
+
+### C. 逻辑解谜挑战
+
+状态：**PREVIEW**
+
+目标：以挑战、线索、有限提示形式训练结构识别、因果推导和约束推理。
+
+---
+
+# 8. 学习资产 Assets
+
+## 8.1 Bug / 错误档案
+
+状态：**LIVE / LIMITED**
+
+展示：
+
+- 错误类型；
+- 出现时间；
+- 对应知识节点；
+- 触发证据；
+- 提示级别；
+- 是否完成修复；
+- 迁移验证结果。
+
+当前可真实展示 `POINTER_ERROR` 记录。
+
+## 8.2 修复日志
+
+状态：**LIVE**
+
+基于 Learning Events 展示：
+
+```text
+发现错误
+→ 给出提示
+→ 重试
+→ 迁移验证
+→ PATCHED / VERIFIED
+```
+
+## 8.3 学习记录
+
+状态：**LIVE**
+
+显示真实 Session 与 Learning Events，不伪造累计学习天数、分数或题量。
+
+## 8.4 逻辑组件库
+
+状态：**PREVIEW / LIMITED**
+
+用于沉淀学生已经掌握、可复用的认知组件，例如：
+
+- `relative_clause.pointer`；
+- `word.root.rupt`；
+- 后续结构骨架；
+- 因果链；
+- 常见约束模式。
+
+当前只允许把真实 VERIFIED 节点展示为已获得组件。
+
+## 8.5 学习效果报告
+
+状态：**PREVIEW**
+
+未来展示：错误变化、迁移成功率、复习表现、节点稳定性。
+
+当前数据量不足，不输出伪精确百分比。
+
+---
+
+# 9. 知识拓扑 Topology
+
+状态：**LIMITED**
+
+事实关系：
+
+```text
+Learning Events
+↓
+Derived Learning State
+↓
+Topology View
+```
+
+拓扑只是状态投影，不作为事实源。
+
+完整课程框架可展示：
+
+```text
+English 必修一
+└─ Unit 4
+   ├─ Vocabulary
+   │  ├─ word.root.rupt          LIMITED / VERIFIED when passed
+   │  ├─ suffix.ion              LOCKED
+   │  └─ word.structure          LOCKED
+   │
+   ├─ Grammar
+   │  └─ relative_clause
+   │     ├─ pointer              LIVE
+   │     ├─ constraint           LOCKED
+   │     └─ substitution         LOCKED
+   │
+   └─ Reading
+      ├─ causal_chain            PREVIEW
+      └─ article_structure       PREVIEW
+```
+
+节点状态采用可解释枚举：
+
+```text
+UNKNOWN
+LEARNING
+WEAK
+PATCHING
+VERIFIED
+REVIEW_DUE
+LOCKED
+```
+
+---
+
+# 10. 自适应调度 / Learning Agent
+
+状态：**LIMITED**
+
+对外称 Learning Agent。
+
+当前内核采用轻量 `LearningController`，负责：
+
+```text
+当前状态
++
+合法下一步
++
+当前任务
++
+推荐原因
+```
+
+当前不需要自由规划。
+
+完整产品未来负责：
+
+- 读取学习状态；
+- 识别阻断节点；
+- 选择当前学习任务；
+- 决定是否提示；
+- 决定是否进入修复；
+- 决定是否进行迁移验证；
+- 更新学习状态；
+- 调度下一任务；
+- 安排复习。
+
+---
+
+# 11. 我的 Profile
+
+状态：**LIMITED / PREVIEW**
+
+完整框架：
+
+- 当前课程；
+- 当前年级；
+- 当前单元；
+- 学习目标；
+- Learning Agent 状态；
+- 内容版本；
+- 学习设置；
+- 数据与隐私说明。
+
+当前不建设完整账号体系，只展示本地 Demo Session 范围的信息。
+
+---
+
+# 12. 基线测试与诊断入口
+
+状态：**PREVIEW**
+
+此前定义的基线诊断能力保留在产品架构中。
+
+未来用于：
+
+```text
+初始任务
+↓
+识别已有能力 / 薄弱节点
+↓
+初始化学习拓扑
+↓
+生成首批 Today Tasks
+```
+
+当前 MVP 不制作大规模基线题库。
+
+---
+
+# 13. AI 边界
+
+系统主干必须在 AI OFF 时成立。
+
+```text
+Deterministic Core
++
+Generative Enhancement
+```
+
+LLM 只允许增强：
+
+1. Explanation；
+2. Variant Candidate Generation；
+3. Ambiguous Diagnosis。
+
+LLM 不负责：
+
+- 标准答案最终判定；
+- 自由修改知识规则；
+- 直接写 VERIFIED；
+- 绕过 Transfer Verification；
+- 伪造学习资产。
+
+---
+
+# 14. 完整功能状态矩阵
+
+| 一级能力 | 二级功能 | 当前状态 |
+|---|---|---|
+| 首页 | Dashboard | LIVE / LIMITED |
+| 今日学习 | 今日任务 / 待修复 / 下一任务 | LIMITED |
+| 逻辑解码 | MECE 结构骨架 | PREVIEW |
+| 逻辑解码 | 词根逻辑拆解 | LIMITED |
+| 逻辑解码 | 长难句公式翻译 | LIVE |
+| 因果推演 | 5 Whys | PREVIEW |
+| 因果推演 | 指令流转 | PREVIEW |
+| 因果推演 | 物理还原 | PREVIEW |
+| 逻辑修复 | 错题归因 | LIVE / LIMITED |
+| 逻辑修复 | 错一订三 | LIVE |
+| 逻辑修复 | 逻辑解谜 | PREVIEW |
+| 学习资产 | Bug / 错误档案 | LIVE / LIMITED |
+| 学习资产 | 修复日志 | LIVE |
+| 学习资产 | 学习记录 | LIVE |
+| 学习资产 | 逻辑组件库 | LIMITED / PREVIEW |
+| 学习资产 | 学习效果报告 | PREVIEW |
+| 知识拓扑 | 节点 / 依赖 / 状态 | LIMITED |
+| Agent | 自适应调度 | LIMITED |
+| 诊断 | 基线测试 | PREVIEW |
+| 我的 | 课程 / 目标 / 设置 | LIMITED / PREVIEW |
+
+该矩阵是产品能力母表。后续版本只能改变状态或增加能力，不得因为暂未开发而删除既有能力。
+
+---
+
+# 15. V3.0 MVP Product Shell
+
+完整 H5 框架至少具备：
+
+```text
+首页
+今日学习
+学习实验室
+逻辑修复
+知识拓扑
+学习资产
+我的
+```
+
+所有页面允许展示完整产品框架。
+
+只有标记为 LIVE / LIMITED 且拥有真实 Content / Runtime 支持的入口可以产生学习行为和状态变化。
+
+PREVIEW 页面点击后应明确显示：
+
+- 能力解决什么问题；
+- 未来典型交互；
+- 当前内容状态；
+- 当前可使用的相关能力。
+
+禁止用不可用按钮、假 loading 或虚构结果模拟真实功能。
+
+---
+
+# 16. 当前真实产品闭环
+
+```text
+Dashboard
+↓
+Today
+↓
+relative_clause.pointer
+↓
+ANSWER
+↓
+POINTER_ERROR
+↓
+最低必要提示
+↓
+RETRY
+↓
+3 × Transfer Verification
+↓
+VERIFIED
+↓
+word.root.rupt
+↓
+VERIFIED
+↓
+Assets / Error Log / Topology 更新
+↓
+返回 Dashboard
+```
+
+这个闭环必须始终保持可运行。
+
+---
+
+# 17. 成功标准
+
+## 产品层
+
+- 用户第一次进入即可理解完整文科实验室由哪些能力组成；
+- 当前不可用能力仍有明确产品位置；
+- LIVE / LIMITED / PREVIEW / LOCKED 状态清晰；
+- 不把 Preview 功能伪装成可用；
+- 当前真实学习内容可以从完整产品框架自然进入。
+
+## 学习层
+
+- 能观察学生操作；
+- 能定位真实 Logic Bug；
+- 能进行最小干预；
+- 修复必须经过迁移验证；
+- 状态有 Learning Events 证据；
+- AI OFF 后核心闭环仍成立。
+
+## 工程层
+
+- Product Shell 不修改已验证的事务与学习内核正确性；
+- Session Restore 正常；
+- Atomic Command / Receipt / Version 保持；
+- CI、Docker Runtime 持续全绿；
+- PREVIEW 内容完全由 Product Manifest 驱动，不需要硬编码散落在多个页面。
+
+---
+
+# 18. 后续路线
+
+当前优先级：
+
+```text
+V3.0 Product Shell
+↓
+把现有 MVP Gold Loop 嵌入完整产品
+↓
+真实 Dashboard / Assets / Topology 投影
+↓
+再增加新的 Content Node
+```
+
+下一批真实内容建议按能力复用价值扩展：
+
+1. `relative_clause.constraint`；
+2. 更多词根逻辑节点；
+3. MECE Reading Structure；
+4. 5 Whys 因果链；
+5. 逻辑解谜挑战。
+
+在已有能力变为 LIVE 之前，不删除其 PREVIEW 产品入口。

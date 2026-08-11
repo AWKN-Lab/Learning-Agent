@@ -1,0 +1,160 @@
+{
+  "version": "3.0",
+  "course": {
+    "grade": "高一",
+    "subject": "英语",
+    "book": "必修一",
+    "unit": "Unit 4 · Natural Disasters"
+  },
+  "status_labels": {
+    "live": "可使用",
+    "limited": "部分开放",
+    "preview": "功能预览",
+    "locked": "待解锁"
+  },
+  "groups": [
+    {
+      "id": "decode",
+      "name": "逻辑解码",
+      "description": "把词、句、文章转换成可见逻辑结构。",
+      "capabilities": [
+        {
+          "id": "mece_structure",
+          "name": "结构骨架器",
+          "status": "preview",
+          "icon": "▦",
+          "description": "用 MECE 方式拆文章主干、分支、缺项和重复项。",
+          "future_interactions": ["文章分层", "结构拖拽", "主干复原", "缺项识别"]
+        },
+        {
+          "id": "word_logic",
+          "name": "词根逻辑拆解",
+          "status": "limited",
+          "icon": "◫",
+          "description": "从前缀、词根、后缀理解构词逻辑。当前真实内容：eruption → e + rupt + ion。",
+          "action": "gold_loop",
+          "node": "word.root.rupt"
+        },
+        {
+          "id": "sentence_formula",
+          "name": "长难句公式翻译",
+          "status": "live",
+          "icon": "⌘",
+          "description": "把长难句拆成主句、从句、先行词和指向关系。",
+          "action": "gold_loop",
+          "node": "relative_clause.pointer"
+        }
+      ]
+    },
+    {
+      "id": "causal",
+      "name": "因果推演",
+      "description": "把抽象叙述还原成可追踪的因果和状态变化。",
+      "capabilities": [
+        {
+          "id": "five_whys",
+          "name": "5 Whys 因果破译",
+          "status": "preview",
+          "icon": "?",
+          "description": "连续追问原因，从表面事实追到底层条件。",
+          "future_interactions": ["因果链", "条件追问", "断点定位"]
+        },
+        {
+          "id": "instruction_flow",
+          "name": "指令流转",
+          "status": "preview",
+          "icon": "⇢",
+          "description": "把知识过程还原成输入、状态变化和输出。",
+          "future_interactions": ["流程排序", "状态追踪", "缺失步骤"]
+        },
+        {
+          "id": "physical_restore",
+          "name": "物理逻辑还原",
+          "status": "preview",
+          "icon": "◇",
+          "description": "还原角色、条件、时间、空间和动作关系。",
+          "future_interactions": ["角色关系", "时间线", "空间关系", "动作链"]
+        }
+      ]
+    },
+    {
+      "id": "repair",
+      "name": "逻辑修复",
+      "description": "像调试程序一样定位 Logic Bug、修复并做回归测试。",
+      "capabilities": [
+        {
+          "id": "error_diagnosis",
+          "name": "错题归因",
+          "status": "limited",
+          "icon": "!",
+          "description": "识别指向、约束、变量替换、因果链和过载等错误类型。当前真实支持 POINTER_ERROR。",
+          "action": "repair",
+          "node": "relative_clause.pointer"
+        },
+        {
+          "id": "triple_patch",
+          "name": "错一订三",
+          "status": "live",
+          "icon": "×3",
+          "description": "修复后用 3 道单变量迁移题做 Regression Test。",
+          "action": "gold_loop",
+          "node": "relative_clause.pointer"
+        },
+        {
+          "id": "logic_puzzle",
+          "name": "逻辑解谜挑战",
+          "status": "preview",
+          "icon": "⌁",
+          "description": "用挑战、线索和有限提示训练结构与因果推理。",
+          "future_interactions": ["线索解谜", "有限提示", "约束推理"]
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "error_archive",
+      "name": "错误档案",
+      "status": "limited",
+      "description": "记录 Logic Bug、证据、提示级别和修复结果。",
+      "action": "assets"
+    },
+    {
+      "id": "repair_log",
+      "name": "修复日志",
+      "status": "live",
+      "description": "按 Learning Events 回看发现错误、提示、重试和验证。",
+      "action": "assets"
+    },
+    {
+      "id": "learning_history",
+      "name": "学习记录",
+      "status": "live",
+      "description": "展示当前 Session 的真实学习事件。",
+      "action": "assets"
+    },
+    {
+      "id": "component_library",
+      "name": "逻辑组件库",
+      "status": "limited",
+      "description": "沉淀已经 VERIFIED、可以复用的逻辑组件。",
+      "action": "assets"
+    },
+    {
+      "id": "learning_report",
+      "name": "学习效果报告",
+      "status": "preview",
+      "description": "未来展示错误变化、迁移成功率、复习表现和节点稳定性。"
+    }
+  ],
+  "topology": [
+    {"id": "word.root.rupt", "name": "rupt 词根", "group": "Vocabulary", "status": "runtime"},
+    {"id": "suffix.ion", "name": "-ion 后缀", "group": "Vocabulary", "status": "locked"},
+    {"id": "word.structure", "name": "构词结构", "group": "Vocabulary", "status": "locked"},
+    {"id": "relative_clause.pointer", "name": "which 指向关系", "group": "Grammar", "status": "runtime"},
+    {"id": "relative_clause.constraint", "name": "定语从句约束", "group": "Grammar", "status": "locked"},
+    {"id": "relative_clause.substitution", "name": "关系变量替换", "group": "Grammar", "status": "locked"},
+    {"id": "causal_chain", "name": "因果链", "group": "Reading", "status": "preview"},
+    {"id": "article_structure", "name": "文章逻辑骨架", "group": "Reading", "status": "preview"}
+  ]
+}
