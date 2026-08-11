@@ -1,10 +1,71 @@
-# RUN EVIDENCE｜Learning-Agent v0.2.0-hardening baseline
+# RUN EVIDENCE｜Learning-Agent PRD V3.0 Closure
 
 > 验证日期：2026-08-11  
 > 模式：Deterministic / AI OFF  
-> 代码基线：`15edeab92a495300a31d6475f865ed9ea5c0f5e0`
+> PRD：V3.0 完整产品框架版  
+> 验证代码 HEAD：`6795e1f3bcab76224c3270e67d65100796b68383`  
+> PR：#8 `feat: close PRD V3.0 product contract`  
+> PR GitHub Actions：`31462567705`
 
-## 1. 学习闭环
+---
+
+# 1. PRD V3.0 产品闭环
+
+V3 当前完成结构：
+
+```text
+完整 Product Shell
+├─ Dashboard
+├─ Today
+├─ Lab
+├─ Repair
+├─ Topology
+├─ Assets
+└─ Profile
+
+Product Manifest
+├─ 完整产品能力母表
+├─ LIVE / LIMITED / PREVIEW / LOCKED
+├─ Baseline Diagnostic 产品入口
+├─ Profile Contract
+└─ Runtime Node Allowlist
+
+Learning Runtime
+├─ relative_clause.pointer
+└─ word.root.rupt
+```
+
+V3 机器契约明确：
+
+```text
+prd_version = 3.0
+product_shell_version = 1.1
+runtime_scope = g10_english_u4_mvp
+preview_can_mutate_learning_state = false
+allowed_runtime_nodes =
+  relative_clause.pointer
+  word.root.rupt
+```
+
+结果：PASS。
+
+---
+
+# 2. Learning Gold Loop 证据
+
+CI authenticated smoke：
+
+```text
+ANSWER_SUBMITTED -> RETRY v 1
+ANSWER_SUBMITTED -> VERIFY v 2
+VERIFY_ANSWER -> VERIFY v 3
+VERIFY_ANSWER -> VERIFY v 4
+VERIFY_ANSWER -> WORD_TASK v 5
+WORD_ANSWER -> DONE v 6
+CLOSED_LOOP ... events=19 receipts=6
+```
+
+学习闭环：
 
 ```text
 TASK
@@ -23,172 +84,227 @@ TASK
 → DONE
 ```
 
-Authenticated Smoke：
+结果：PASS。
+
+---
+
+# 3. V3 Product Contract 证据
+
+新增：
 
 ```text
-ANSWER_SUBMITTED -> RETRY v 1
-ANSWER_SUBMITTED -> VERIFY v 2
-VERIFY_ANSWER -> VERIFY v 3
-VERIFY_ANSWER -> VERIFY v 4
-VERIFY_ANSWER -> WORD_TASK v 5
-WORD_ANSWER -> DONE v 6
-CLOSED_LOOP ... events=19 receipts=6
+tests/test_product_v3_contract.py
 ```
 
-## 2. P1-0 / P1-1 / P1-2｜状态完整性
+验证：
 
-完成：
+- PRD / Manifest Version = 3.0；
+- Product Shell 七页契约；
+- 完整 Capability Matrix；
+- `baseline_diagnostic = preview`；
+- PREVIEW capability 无 `action`；
+- PREVIEW capability 无 runtime `node`；
+- `gold_loop / repair` 只能绑定允许 Runtime Nodes；
+- Topology runtime node 集合与 allowlist 完全一致；
+- Profile Contract 持续存在。
+
+CI pytest：
+
+```text
+21 passed
+1 warning
+```
+
+warning 为 Starlette TestClient / httpx 兼容弃用提示，不影响当前测试结果。
+
+结果：PASS。
+
+---
+
+# 4. Static H5 V3 Contract
+
+`scripts/check_static.py` 已升级为可解析的 V3 产品契约门禁。
+
+验证：
+
+- `index.html / app.js / style.css / product-manifest.json` 存在；
+- Dashboard / Today / Lab / Repair / Topology / Assets / Profile 存在；
+- Product Manifest 可解析；
+- V3 Capability Matrix 完整；
+- Preview Isolation；
+- Runtime Node 精确集合；
+- Assets 状态矩阵；
+- Profile Contract；
+- `/xueba/` 子路径相对 URL 安全。
+
+CI 输出：
+
+```text
+STATIC_H5_V3_OK
+```
+
+结果：PASS。
+
+---
+
+# 5. PRD V3 功能状态证据
+
+## 5.1 逻辑解码
+
+```text
+MECE 结构骨架器       PREVIEW
+词根逻辑拆解           LIMITED
+长难句公式翻译         LIVE
+```
+
+## 5.2 因果推演
+
+```text
+5 Whys                PREVIEW
+指令流转               PREVIEW
+物理逻辑还原           PREVIEW
+```
+
+## 5.3 逻辑修复
+
+```text
+错题归因               LIMITED
+错一订三               LIVE
+逻辑解谜               PREVIEW
+```
+
+## 5.4 基线诊断
+
+```text
+基线测试与诊断         PREVIEW
+```
+
+## 5.5 学习资产
+
+```text
+错误档案               LIMITED
+修复日志               LIVE
+学习记录               LIVE
+逻辑组件库             LIMITED
+学习效果报告           PREVIEW
+```
+
+PREVIEW 能力没有伪造 Runtime、成绩或 Learning Events。
+
+结果：PASS。
+
+---
+
+# 6. Hardened Runtime 回归证据
+
+本次 V3 Closure diff 没有修改：
+
+```text
+apps/api/app.py
+apps/api/domain.py
+apps/api/store.py
+apps/api/security.py
+apps/api/settings.py
+apps/api/runtime_errors.py
+```
+
+原有 P1 正确性能力继续由现有测试覆盖：
 
 - Pure `LearningController.reduce()`；
 - Command / Events / Session / Receipt 单 SQLite Transaction；
 - Exact Receipt Replay；
 - `expected_version` Optimistic Concurrency；
-- 4 个 Fault Injection Rollback；
-- 两个 Store 实例并发；
+- Transaction Fault Injection Rollback；
+- 多 Store 并发；
 - Duplicate Command 并发；
-- Event Replay / Integrity Check；
-- Policy / Content Version Replay Guard。
-
-主分支代码：`d2f00d3f7d7086b69ee612857b65454214553ac0`。
-
-GitHub Actions：`31427875056`。
-
-```text
-test    SUCCESS
-docker  SUCCESS
-```
-
-## 3. P1 Runtime Governance
-
-完成：
-
-- Session Token；
-- Token Hash at Rest；
+- Event Replay / Integrity；
+- Session Token Hash at Rest；
 - Session TTL；
-- `last_accessed_at`；
 - SQLite Shared Rate Limit；
-- Session Cleanup；
-- max-sessions Capacity；
+- Cleanup / Capacity；
 - Production Trusted Host Guard；
-- Request Content-Length Gate；
-- `/live` / `/ready`；
-- Structured Mutation Logs；
-- Docker readiness / auth / cleanup smoke。
+- `/live` / `/ready`。
 
-代码基线：`15edeab92a495300a31d6475f865ed9ea5c0f5e0`。
+21-test 全量门禁通过，Gold Loop Smoke 通过。
 
-PR #4 CI：`31428953782`。
+结果：PASS。
+
+---
+
+# 7. CI / Docker 证据
+
+PR #8 验证代码 HEAD：
 
 ```text
-test    SUCCESS
-docker  SUCCESS
+6795e1f3bcab76224c3270e67d65100796b68383
 ```
 
-主分支 CI：`31429090745`。
+GitHub Actions：
 
 ```text
-test    SUCCESS
-docker  SUCCESS
+31462567705
 ```
 
-Test Job 已执行：
+Test Job：
 
 ```text
+pip install                       SUCCESS
 pip check                         SUCCESS
 compileall                        SUCCESS
-pytest -q                         SUCCESS (16 tests)
-authenticated smoke              SUCCESS
-static H5 contract               SUCCESS
-cleanup dry-run                  SUCCESS
-node --check                     SUCCESS
+pytest -q                         SUCCESS (21 passed)
+authenticated Gold Loop smoke     SUCCESS
+static H5 V3 contract             SUCCESS
+cleanup dry-run                   SUCCESS
+node --check                      SUCCESS
 ```
 
-Docker Job 已执行：
+Docker Job：
 
 ```text
-Docker build                     SUCCESS
-container start                  SUCCESS
-GET /api/v1/ready                SUCCESS
-GET /api/v1/live                 SUCCESS
-GET /                            SUCCESS
-POST /api/v1/session/start       SUCCESS + session_token
-container cleanup dry-run        SUCCESS
-```
-
-## 4. 原子事务证据
-
-故障注入位置：
-
-```text
-after_command_event
-after_events
-before_session_update
-before_receipt
-```
-
-每个位置均要求：
-
-```text
-Session Snapshot 不变化
-Learning Events 不残留
-Receipt 不残留
+Docker build                      SUCCESS
+Docker runtime smoke              SUCCESS
 ```
 
 结果：PASS。
 
-## 5. 并发证据
+---
 
-### 不同 Command / 同旧 Version
+# 8. 红灯修复记录
 
-两个独立 Store 实例同时提交：
+PR 第一轮 CI `31462512468` 曾失败：
 
 ```text
-1 个成功
-1 个 StateConflict
-最终 version = 1
-只产生 1 个 Command Receipt
+20 passed
+1 failed
 ```
 
-结果：PASS。
+失败项来自新 V3 测试误要求 PRD 中包含英文小写字符串 `baseline`，而 PRD 使用中文“基线测试与诊断入口”。
 
-### 相同 Command 并发
+处理：
 
 ```text
-两个请求返回相同 Receipt
-状态只推进一次
-Receipt 只有一条
+修正错误测试断言
+不修改 PRD 语义
+不修改 Learning Runtime
 ```
 
-结果：PASS。
+第二轮全量门禁恢复双绿。
 
-## 6. Session 安全证据
+该记录保留，用于证明门禁没有被跳过或手工忽略。
 
-- 不带 Token：401；
-- 错 Token：401；
-- 正确 Token：200；
-- SQLite 中保存值 = SHA-256(token)；
-- SQLite 中不存在 Token 明文；
-- 过期 Session：410；
-- Production `TRUSTED_HOSTS` 缺失：启动配置拒绝；
-- Production `TRUSTED_HOSTS=*`：拒绝。
+---
 
-## 7. 生命周期证据
-
-Cleanup：
+# 9. 当前结论
 
 ```text
---dry-run         只返回候选，不删除
-expired           可清理
-max-sessions      可裁剪历史 Session
-FK cascade        Events / Receipts 随 Session 清理
-```
-
-CI 与 Docker 内均执行 dry-run 门禁。
-
-## 8. 当前结论
-
-```text
-Learning Demo Closed Loop    PASS
+PRD V3 Product Shell         PASS
+Capability Manifest          PASS
+Baseline Diagnostic Entry    PASS
+Profile Contract             PASS
+Preview Isolation            PASS
+Runtime Node Allowlist       PASS
+Real State Projection        PASS
+Learning Gold Loop           PASS
 Atomic Transaction           PASS
 Receipt Replay               PASS
 Optimistic Concurrency       PASS
@@ -198,10 +314,19 @@ Session Authentication       PASS
 Session TTL                  PASS
 Shared Rate Limit            PASS
 Cleanup / Capacity           PASS
-Production Config Guard      PASS
-Remote CI                    PASS
+Subpath Safe                 PASS
+GitHub PR CI                 PASS
 Docker Runtime               PASS
-Public Deploy                BLOCKED_EXTERNAL
 ```
 
-公网 Deployment 暂无真实成功回执。当前 Vercel 连接无 Team / Project 上下文；因此保持 `BLOCKED_EXTERNAL`，不伪造 URL、Release 或生产 Rollback 回执。
+**PRD V3.0 Development：代码与产品工程闭环已达到合并门槛。**
+
+仍独立保留：
+
+```text
+Public Deploy        BLOCKED_EXTERNAL
+Production Release   PENDING_DEPLOY
+Production Rollback  PENDING_DEPLOY
+```
+
+公网 Deployment 当前没有真实成功回执，因此不伪造 URL、Release 或生产 Rollback。
